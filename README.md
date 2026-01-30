@@ -1,10 +1,11 @@
-# SW Personal - Mood-Adaptive Productivity Dashboard
+# FlowState - Mood-Adaptive Productivity Dashboard
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react" alt="React" />
   <img src="https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Tailwind-4-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS" />
-  <img src="https://img.shields.io/badge/Framer_Motion-11-FF0080?style=for-the-badge&logo=framer" alt="Framer Motion" />
+  <img src="https://img.shields.io/badge/Framer_Motion-12-FF0080?style=for-the-badge&logo=framer" alt="Framer Motion" />
 </p>
 
 <p align="center">
@@ -38,7 +39,7 @@ Curated music recommendations to match your flow:
 - Quick access playlists
 - Track suggestions based on mood
 - Integrated playback controls
-- Spotify integration ready
+- Multi-platform music integration (Spotify, SoundCloud, Apple Music, YouTube)
 
 ### 📊 Analytics Dashboard
 Track your productivity trends:
@@ -46,6 +47,11 @@ Track your productivity trends:
 - Weekly performance charts
 - Activity heatmap visualization
 - AI-powered insights and recommendations
+
+### 🎬 Interactive Demo
+- Demo walkthrough modal for new users
+- Pricing modal with plan options
+- Animated particle backgrounds
 
 ## 🚀 Getting Started
 
@@ -57,8 +63,8 @@ Track your productivity trends:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/sw-personal.git
-cd sw-personal
+git clone https://github.com/yourusername/flowstate.git
+cd flowstate
 
 # Install dependencies
 npm install
@@ -80,10 +86,11 @@ npm start
 
 | Technology | Purpose |
 |------------|---------|
-| **Next.js 14** | React framework with App Router |
-| **TypeScript** | Type-safe development |
-| **Tailwind CSS** | Utility-first styling |
-| **Framer Motion** | Smooth animations |
+| **Next.js 16** | React framework with App Router |
+| **React 19** | UI library with latest features |
+| **TypeScript 5** | Type-safe development |
+| **Tailwind CSS 4** | Utility-first styling |
+| **Framer Motion 12** | Smooth animations |
 | **Lucide Icons** | Beautiful icon set |
 
 ## 🎨 Design Features
@@ -92,14 +99,19 @@ npm start
 - **Glass Morphism** - Modern, translucent UI elements
 - **Gradient Accents** - Dynamic color highlights
 - **Micro-Animations** - Delightful hover and transition effects
+- **Particle Effects** - Floating and rising particle backgrounds
 - **Responsive Design** - Works on all devices
 
 ## 📁 Project Structure
 
 ```
-sw-personal/
+flowstate/
 ├── src/
 │   ├── app/                    # Next.js App Router
+│   │   ├── api/                # API routes
+│   │   │   └── auth/           # OAuth callbacks
+│   │   │       ├── spotify/    # Spotify auth
+│   │   │       └── soundcloud/ # SoundCloud auth
 │   │   ├── globals.css         # Global styles & theme
 │   │   ├── layout.tsx          # Root layout
 │   │   └── page.tsx            # Main dashboard page
@@ -118,9 +130,21 @@ sw-personal/
 │   │       ├── badge.tsx
 │   │       ├── button.tsx
 │   │       ├── card.tsx
+│   │       ├── demo-modal.tsx
+│   │       ├── demo-walkthrough-modal.tsx
+│   │       ├── particles.tsx
+│   │       ├── pricing-modal.tsx
 │   │       └── progress-ring.tsx
 │   ├── hooks/                  # Custom React hooks
+│   │   ├── use-analytics.ts    # Analytics tracking
+│   │   └── use-music.ts        # Music player state
 │   └── lib/
+│       ├── analytics.ts        # Analytics utilities
+│       ├── music/              # Music service integrations
+│       │   ├── apple-music.ts
+│       │   ├── soundcloud.ts
+│       │   ├── spotify.ts
+│       │   └── youtube.ts
 │       └── utils.ts            # Utility functions
 ├── public/                     # Static assets
 └── package.json
@@ -130,7 +154,10 @@ sw-personal/
 
 - [ ] User authentication
 - [ ] Persistent data storage
-- [ ] Spotify API integration
+- [x] Spotify API integration
+- [x] SoundCloud integration
+- [x] Apple Music integration
+- [x] YouTube integration
 - [ ] Browser extension
 - [ ] Mobile app (React Native)
 - [ ] AI-powered mood detection
@@ -142,5 +169,5 @@ MIT License - feel free to use this project for your own portfolio or learning p
 ---
 
 <p align="center">
-  <strong>SW Personal</strong> · Mood-Adaptive Productivity · Silver Wolf Labs
+  <strong>FlowState</strong> · Mood-Adaptive Productivity · Silver Wolf Labs
 </p>
