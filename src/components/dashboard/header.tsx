@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sparkles, Github, Menu, X } from "lucide-react";
+import { Waves, Github, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -32,7 +32,7 @@ export function Header() {
             transition={{ type: "spring", stiffness: 400 }}
           >
             <motion.div
-              className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent"
+              className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent overflow-hidden"
               animate={{ 
                 boxShadow: [
                   "0 0 20px rgba(139, 92, 246, 0.3)",
@@ -42,11 +42,11 @@ export function Header() {
               }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              <Sparkles className="w-5 h-5 text-white" />
+              <Waves className="w-5 h-5 text-white" />
             </motion.div>
             <div className="flex flex-col">
-              <span className="font-bold text-lg leading-tight">SW Personal</span>
-              <span className="text-[10px] text-muted-foreground leading-tight">Silver Wolf Labs</span>
+              <span className="font-bold text-lg leading-tight">FlowState</span>
+              <span className="text-[10px] text-muted-foreground leading-tight">by Silver Wolf Labs</span>
             </div>
           </motion.div>
 

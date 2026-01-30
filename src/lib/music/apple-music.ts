@@ -114,7 +114,7 @@ export const appleMusicAuth = {
       musicKitInstance = await window.MusicKit.configure({
         developerToken,
         app: {
-          name: process.env.NEXT_PUBLIC_APPLE_MUSIC_APP_NAME || "SW Personal",
+          name: process.env.NEXT_PUBLIC_APPLE_MUSIC_APP_NAME || "FlowState",
           build: process.env.NEXT_PUBLIC_APPLE_MUSIC_APP_BUILD || "1.0.0",
         },
       });

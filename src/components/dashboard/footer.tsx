@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Github, Twitter, Linkedin, Heart, Sparkles } from "lucide-react";
+import { Github, Twitter, Linkedin, Heart, Waves } from "lucide-react";
 
 const socialLinks = [
   { icon: Github, href: "https://github.com", label: "GitHub" },
@@ -43,11 +43,11 @@ export function Footer() {
               whileHover={{ scale: 1.02 }}
             >
               <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent">
-                <Sparkles className="w-5 h-5 text-white" />
+                <Waves className="w-5 h-5 text-white" />
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-lg leading-tight">SW Personal</span>
-                <span className="text-[10px] text-muted-foreground leading-tight">Silver Wolf Labs</span>
+                <span className="font-bold text-lg leading-tight">FlowState</span>
+                <span className="text-[10px] text-muted-foreground leading-tight">by Silver Wolf Labs</span>
               </div>
             </motion.div>
             <p className="text-sm text-muted-foreground mb-4 max-w-xs">
@@ -104,7 +104,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Silver Wolf Labs. All rights reserved.
+            © {new Date().getFullYear()} FlowState. All rights reserved.
           </p>
           <motion.p 
             className="flex items-center gap-1 text-sm text-muted-foreground"
@@ -117,7 +117,7 @@ export function Footer() {
             >
               <Heart className="w-4 h-4 text-red-500 fill-red-500" />
             </motion.span>
-            {" "}by Silver Wolf Labs
+            {" "}for productivity lovers
           </motion.p>
         </div>
       </div>

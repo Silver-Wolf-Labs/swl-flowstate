@@ -13,13 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SW Personal | Mood-Adaptive Productivity Dashboard",
-  description: "A mood-adaptive productivity dashboard that helps developers and creators stay in flow while coding. Built by Silver Wolf Labs.",
-  keywords: ["productivity", "dashboard", "focus", "pomodoro", "developer tools", "flow state"],
-  authors: [{ name: "Silver Wolf Labs" }],
+  title: "FlowState | Mood-Adaptive Productivity Dashboard",
+  description: "Enter your flow state with mood-adaptive productivity tools. Focus timer, lofi music, and real-time analytics to boost your productivity.",
+  keywords: ["productivity", "dashboard", "focus", "pomodoro", "flow state", "lofi music", "developer tools"],
+  authors: [{ name: "FlowState" }],
   openGraph: {
-    title: "SW Personal | Mood-Adaptive Productivity Dashboard",
-    description: "Stay in flow while coding with mood-adaptive productivity tools",
+    title: "FlowState | Focus. Flow. Achieve.",
+    description: "Enter your flow state with mood-adaptive productivity tools and lofi beats",
     type: "website",
   },
 };

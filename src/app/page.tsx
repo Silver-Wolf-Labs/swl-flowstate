@@ -12,13 +12,16 @@ import {
   AnalyticsPreview,
   Footer,
 } from "@/components/dashboard";
-import { Particles, RisingParticles } from "@/components/ui/particles";
+import { Particles, RisingParticles, DemoModal, PricingModal, DemoWalkthroughModal } from "@/components/ui";
 import { useAnalytics } from "@/hooks";
 
 export type MoodId = "focus" | "calm" | "energetic" | "creative";
 
 export default function Home() {
   const [currentMood, setCurrentMood] = useState<MoodId>("focus");
+  const [showDemoModal, setShowDemoModal] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showDemoWalkthrough, setShowDemoWalkthrough] = useState(false);
   const { recordSession } = useAnalytics();
 
   return (
@@ -31,7 +34,7 @@ export default function Home() {
       <Header />
 
       {/* Hero section */}
-      <HeroSection />
+      <HeroSection onWatchDemo={() => setShowDemoWalkthrough(true)} />
 
       {/* Features section */}
       <FeaturesSection />
@@ -132,7 +135,7 @@ export default function Home() {
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
           >
-            Join thousands of developers who have transformed their workflow with SW Personal.
+            Join thousands of developers who have transformed their workflow with FlowState.
           </motion.p>
           <motion.div
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
@@ -149,19 +152,26 @@ export default function Home() {
               transition={{ 
                 backgroundPosition: { duration: 3, repeat: Infinity, ease: "linear" },
               }}
+              onClick={() => setShowPricingModal(true)}
             >
-              Get Started Free
+              Get Started
             </motion.button>
             <motion.button
               className="inline-flex items-center justify-center px-8 py-4 text-lg font-medium rounded-xl border-2 border-primary/50 bg-transparent text-primary hover:bg-primary/10 transition-colors"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={() => setShowDemoModal(true)}
             >
               Schedule Demo
             </motion.button>
           </motion.div>
         </motion.div>
       </section>
+
+      {/* Modals */}
+      <DemoModal isOpen={showDemoModal} onClose={() => setShowDemoModal(false)} />
+      <PricingModal isOpen={showPricingModal} onClose={() => setShowPricingModal(false)} />
+      <DemoWalkthroughModal isOpen={showDemoWalkthrough} onClose={() => setShowDemoWalkthrough(false)} />
 
       {/* Footer */}
       <Footer />

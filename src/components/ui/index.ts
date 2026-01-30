@@ -4,3 +4,6 @@ export { ProgressRing } from "./progress-ring";
 export { AnimatedNumber, TimerDisplay } from "./animated-number";
 export { Badge } from "./badge";
 export { Particles, ConstellationParticles, SparkleParticles, RisingParticles } from "./particles";
+export { DemoModal } from "./demo-modal";
+export { PricingModal } from "./pricing-modal";
+export { DemoWalkthroughModal } from "./demo-walkthrough-modal";
