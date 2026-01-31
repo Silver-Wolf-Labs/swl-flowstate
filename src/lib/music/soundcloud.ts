@@ -319,27 +319,27 @@ export const moodSearchQueries = {
 };
 
 // Curated SoundCloud lofi playlists for each mood (no auth required)
-// Using playlist URLs that work with the embedded player
+// Using verified playlist URLs that work with the embedded player
 export const curatedSoundCloudStreams: Record<string, { url: string; title: string; artist: string }[]> = {
   focus: [
-    { url: "https://soundcloud.com/lolofi/sets/lofi-hip-hop", title: "Lofi Hip Hop Mix", artist: "LoLofi" },
-    { url: "https://soundcloud.com/chaborilemusic/sets/lofi-hip-hop-mix", title: "Lofi Hip Hop Study Beats", artist: "Chaborile" },
-    { url: "https://soundcloud.com/lofi_girl/sets/lofi-hip-hop-beats-to-sleep", title: "Lofi Beats to Sleep", artist: "Lofi Girl" },
+    { url: "https://soundcloud.com/sc-playlists/sets/lo-fi-chill-beats", title: "Lo-Fi Chill Beats", artist: "SoundCloud Playlists" },
+    { url: "https://soundcloud.com/lofi_girl/sets/jazz-lofi", title: "Jazz Lofi", artist: "Lofi Girl" },
+    { url: "https://soundcloud.com/chill-playlister/sets/lofi-jazz-hop-lo-fi-beats", title: "Lofi Jazz Hop", artist: "Chill Playlister" },
   ],
   calm: [
-    { url: "https://soundcloud.com/chaborilemusic/sets/chill-lofi-beats", title: "Chill Lofi Beats", artist: "Chaborile" },
-    { url: "https://soundcloud.com/lofi_girl/sets/chill-lofi", title: "Chill Lofi", artist: "Lofi Girl" },
-    { url: "https://soundcloud.com/lolofi/sets/rainy-lofi", title: "Rainy Day Lofi", artist: "LoLofi" },
+    { url: "https://soundcloud.com/ambient-rest/sets/lo-fi-and-chill", title: "Lo-Fi & Chill", artist: "Ambient Rest" },
+    { url: "https://soundcloud.com/jazzhopcafe/sets/a-peaceful-place-lofi-jazzhop-chillhop-mix", title: "A Peaceful Place", artist: "The Jazz Hop Café" },
+    { url: "https://soundcloud.com/jazzhopcafe/cozy-morning-lofi-jazz-hop-chill-beats", title: "Cozy Morning", artist: "The Jazz Hop Café" },
   ],
   energetic: [
-    { url: "https://soundcloud.com/nocopyrightsounds/sets/ncs-uplifting", title: "NCS Uplifting", artist: "NoCopyrightSounds" },
-    { url: "https://soundcloud.com/lolofi/sets/lofi-beats-chill", title: "Upbeat Lofi", artist: "LoLofi" },
-    { url: "https://soundcloud.com/chaborilemusic/sets/lofi-hip-hop-chill", title: "Lofi Chill Vibes", artist: "Chaborile" },
+    { url: "https://soundcloud.com/user-69348294/deep-focus-lofi-mix-lofi-study-work-chill-beats", title: "Deep Focus Lofi Mix", artist: "Lofi Music Universe" },
+    { url: "https://soundcloud.com/lofi_girl/sets/best-of-lofi-2023", title: "Best of Lofi 2023", artist: "Lofi Girl" },
+    { url: "https://soundcloud.com/lofi_girl/sets/best-of-lofi-2022", title: "Best of Lofi 2022", artist: "Lofi Girl" },
   ],
   creative: [
-    { url: "https://soundcloud.com/lolofi/sets/jazz-lofi", title: "Jazz Lofi Mix", artist: "LoLofi" },
-    { url: "https://soundcloud.com/chaborilemusic/sets/jazzy-lofi", title: "Jazzy Lofi Beats", artist: "Chaborile" },
-    { url: "https://soundcloud.com/lofi_girl/sets/lofi-jazz", title: "Lofi Jazz", artist: "Lofi Girl" },
+    { url: "https://soundcloud.com/jazzhopcafe/record-shop-jazz-hop-lofi-chill-mix", title: "Record Shop Jazz Hop Lofi", artist: "The Jazz Hop Café" },
+    { url: "https://soundcloud.com/jazzhopcafe/staying-in-lofi-jazzhop-chill-mix", title: "Staying In – Lofi Jazzhop Chill", artist: "The Jazz Hop Café" },
+    { url: "https://soundcloud.com/432hzlo-fijazz", title: "432 Hz Lo-Fi Jazz", artist: "432 Hz Lo-Fi Jazz" },
   ],
 };
 
