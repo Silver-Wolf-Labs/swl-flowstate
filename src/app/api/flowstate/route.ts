@@ -114,8 +114,9 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ success: true, state: newState });
   } catch (error) {
-    console.error("FlowState sync error:", error);
-    return NextResponse.json({ error: "Failed to update state" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("FlowState sync error:", errorMessage, error);
+    return NextResponse.json({ error: "Failed to update state", details: errorMessage }, { status: 500 });
   }
 }
 
