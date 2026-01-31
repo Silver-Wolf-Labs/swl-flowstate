@@ -318,28 +318,28 @@ export const moodSearchQueries = {
   creative: ["indie creative", "inspiration music", "artistic vibes", "creative flow"],
 };
 
-// Curated SoundCloud tracks for each mood (no auth required)
-// Using API track URLs that are guaranteed to work with the embedded player
+// Curated SoundCloud lofi playlists for each mood (no auth required)
+// Using playlist URLs that work with the embedded player
 export const curatedSoundCloudStreams: Record<string, { url: string; title: string; artist: string }[]> = {
   focus: [
-    { url: "https://api.soundcloud.com/tracks/1299936532", title: "Lofi Study Session", artist: "Lofi Fruits" },
-    { url: "https://api.soundcloud.com/tracks/665373617", title: "Coffee Shop Vibes", artist: "Chillhop" },
-    { url: "https://api.soundcloud.com/tracks/707904052", title: "Late Night Study", artist: "Lofi Hip Hop" },
+    { url: "https://soundcloud.com/lolofi/sets/lofi-hip-hop", title: "Lofi Hip Hop Mix", artist: "LoLofi" },
+    { url: "https://soundcloud.com/chaborilemusic/sets/lofi-hip-hop-mix", title: "Lofi Hip Hop Study Beats", artist: "Chaborile" },
+    { url: "https://soundcloud.com/lofi_girl/sets/lofi-hip-hop-beats-to-sleep", title: "Lofi Beats to Sleep", artist: "Lofi Girl" },
   ],
   calm: [
-    { url: "https://api.soundcloud.com/tracks/248149204", title: "Weightless", artist: "Marconi Union" },
-    { url: "https://api.soundcloud.com/tracks/156554796", title: "Claire de Lune", artist: "Debussy" },
-    { url: "https://api.soundcloud.com/tracks/291", title: "Peaceful Piano", artist: "Ambient Sounds" },
+    { url: "https://soundcloud.com/chaborilemusic/sets/chill-lofi-beats", title: "Chill Lofi Beats", artist: "Chaborile" },
+    { url: "https://soundcloud.com/lofi_girl/sets/chill-lofi", title: "Chill Lofi", artist: "Lofi Girl" },
+    { url: "https://soundcloud.com/lolofi/sets/rainy-lofi", title: "Rainy Day Lofi", artist: "LoLofi" },
   ],
   energetic: [
-    { url: "https://api.soundcloud.com/tracks/325095816", title: "Cartoon - On & On", artist: "NCS" },
-    { url: "https://api.soundcloud.com/tracks/232093549", title: "Elektronomia - Sky High", artist: "NCS" },
-    { url: "https://api.soundcloud.com/tracks/271188615", title: "Spektrem - Shine", artist: "NCS" },
+    { url: "https://soundcloud.com/nocopyrightsounds/sets/ncs-uplifting", title: "NCS Uplifting", artist: "NoCopyrightSounds" },
+    { url: "https://soundcloud.com/lolofi/sets/lofi-beats-chill", title: "Upbeat Lofi", artist: "LoLofi" },
+    { url: "https://soundcloud.com/chaborilemusic/sets/lofi-hip-hop-chill", title: "Lofi Chill Vibes", artist: "Chaborile" },
   ],
   creative: [
-    { url: "https://api.soundcloud.com/tracks/664618900", title: "Jazz Vibes", artist: "Chillhop" },
-    { url: "https://api.soundcloud.com/tracks/723504777", title: "Creative Flow", artist: "Lofi Geek" },
-    { url: "https://api.soundcloud.com/tracks/597166498", title: "Inspiration", artist: "Dreamhop" },
+    { url: "https://soundcloud.com/lolofi/sets/jazz-lofi", title: "Jazz Lofi Mix", artist: "LoLofi" },
+    { url: "https://soundcloud.com/chaborilemusic/sets/jazzy-lofi", title: "Jazzy Lofi Beats", artist: "Chaborile" },
+    { url: "https://soundcloud.com/lofi_girl/sets/lofi-jazz", title: "Lofi Jazz", artist: "Lofi Girl" },
   ],
 };
 

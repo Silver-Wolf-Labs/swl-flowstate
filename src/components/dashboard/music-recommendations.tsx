@@ -21,7 +21,7 @@ import {
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, Button, Badge } from "@/components/ui";
 import { useMusic, type Track, type MoodType, type Playlist } from "@/hooks/use-music";
-import { favoritesManager, playlistManager, type UserPlaylist, type YouTubeVideo } from "@/lib/music";
+import { favoritesManager, playlistManager, soundcloudAuth, type UserPlaylist, type YouTubeVideo } from "@/lib/music";
 import { cn } from "@/lib/utils";
 
 // Spotify and Apple Music icons
@@ -586,9 +586,20 @@ export function MusicRecommendations({ mood = "focus" }: MusicRecommendationsPro
                     src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(scPlayerUrl || recommendations[0]?.uri || "https://api.soundcloud.com/tracks/293")}&color=%238b5cf6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=true&visual=false`}
                     style={{ borderRadius: "12px" }}
                   />
-                  <div className="bg-secondary/30 px-3 py-2 text-xs text-muted-foreground flex items-center gap-2">
-                    <Music className="w-3 h-3" />
-                    Click any track above to load it, then press play in the player
+                  <div className="bg-secondary/30 px-3 py-2 text-xs text-muted-foreground flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <SoundCloudIcon className="w-3 h-3 text-[#FF5500]" />
+                      <span>Click any playlist above to load it</span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => soundcloudAuth.login()}
+                      className="h-6 px-2 text-xs text-[#FF5500] hover:text-[#FF5500] hover:bg-[#FF5500]/10"
+                    >
+                      <LogIn className="w-3 h-3 mr-1" />
+                      Sign In for more
+                    </Button>
                   </div>
                 </motion.div>
               )}
