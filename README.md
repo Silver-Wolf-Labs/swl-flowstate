@@ -213,10 +213,10 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### Documentation
 
-- Quick Start Guide: `docs/QUICK-START-GUIDE.md`
-- MCP Setup: `docs/MCP-SETUP.md`
-- API Reference: `docs/API.md`
-- Command Cheat Sheet: `docs/CHEATSHEET.md`
+- [Quick Start Guide](docs/QUICK-START-GUIDE.md)
+- [MCP Setup](docs/MCP-SETUP.md)
+- [API Reference](docs/API.md)
+- [Command Cheat Sheet](docs/CHEATSHEET.md)
 
 ### Environment Variables
 
@@ -277,8 +277,7 @@ flowstate/
 
 ## 📄 License
 
-MIT License - feel free to use this project for your own portfolio or learning purposes.
-
+This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
 ---
 
 <p align="center">
