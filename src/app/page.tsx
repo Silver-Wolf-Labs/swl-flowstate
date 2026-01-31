@@ -34,7 +34,8 @@ export default function Home() {
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showDemoWalkthrough, setShowDemoWalkthrough] = useState(false);
-  const [ideControlled, setIdeControlled] = useState(false);
+  const [ideConnected, setIdeConnected] = useState(false); // True when opened from IDE
+  const [ideControlled, setIdeControlled] = useState(false); // Brief flash when IDE changes something
   const urlParamsProcessed = useRef(false);
   const { recordSession } = useAnalytics();
 
@@ -88,7 +89,7 @@ export default function Home() {
 
     if (fromIDE === "true") {
       urlParamsProcessed.current = true;
-      setIdeControlled(true);
+      setIdeConnected(true); // Keep connected for the session
       
       // Set mood from URL (already set by getInitialMood, but ensure it's synced)
       if (moodParam && ["focus", "calm", "energetic", "creative"].includes(moodParam)) {
@@ -195,15 +196,15 @@ export default function Home() {
 
           {/* Dashboard grid */}
           <div className="space-y-8">
-            {/* IDE Connection indicator - only shows when MCP is actively connected */}
-            {isMcpConnected && (
+            {/* IDE Connection indicator - shows when opened from IDE or MCP is active */}
+            {(ideConnected || isMcpConnected) && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="flex items-center justify-center gap-2 text-sm text-muted-foreground"
               >
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                IDE Connected {ideControlled && <span className="text-primary font-medium">• Controlled by IDE</span>}
+                IDE Connected {ideControlled && <span className="text-primary font-medium">• Syncing</span>}
               </motion.div>
             )}
 
