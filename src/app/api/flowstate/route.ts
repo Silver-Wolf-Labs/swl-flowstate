@@ -14,6 +14,7 @@ export interface FlowStateSync {
   sessionsCompleted: number;
   totalFocusTime: number;
   lastUpdated: number;
+  lastMcpUpdate: number; // Timestamp of last MCP server update
   scrollTo?: "mood" | "timer" | "music" | "analytics" | null;
 }
 
@@ -26,6 +27,7 @@ const defaultState: FlowStateSync = {
   sessionsCompleted: 0,
   totalFocusTime: 0,
   lastUpdated: Date.now(),
+  lastMcpUpdate: 0, // No MCP connection initially
   scrollTo: null,
 };
 
@@ -54,10 +56,17 @@ export async function POST(request: NextRequest) {
     const updates = await request.json();
     const currentState = await readState();
     
+    // Check if this update is from MCP (includes source: "mcp")
+    const isMcpUpdate = updates.source === "mcp";
+    // Remove source from updates before saving
+    const { source, ...stateUpdates } = updates;
+    
     const newState: FlowStateSync = {
       ...currentState,
-      ...updates,
+      ...stateUpdates,
       lastUpdated: Date.now(),
+      // Update lastMcpUpdate only if this is from MCP
+      lastMcpUpdate: isMcpUpdate ? Date.now() : currentState.lastMcpUpdate,
     };
     
     await writeState(newState);

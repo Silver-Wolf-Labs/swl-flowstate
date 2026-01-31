@@ -28,7 +28,12 @@ const WEB_APP_URL = process.env.FLOWSTATE_WEB_URL || "http://localhost:3000";
 // Sync state with web app
 async function syncWithWebApp(updates: Record<string, unknown>, scrollTo?: string) {
   try {
-    const payload = scrollTo ? { ...updates, scrollTo } : updates;
+    // Always include source: "mcp" to identify updates from IDE
+    const payload = { 
+      ...updates, 
+      source: "mcp",
+      ...(scrollTo ? { scrollTo } : {}),
+    };
     await fetch(`${WEB_APP_URL}/api/flowstate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

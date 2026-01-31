@@ -59,7 +59,7 @@ export default function Home() {
   }, []);
 
   // Sync with MCP/IDE
-  const { syncState, isConnected, updateState } = useFlowStateSync({
+  const { syncState, isMcpConnected, updateState } = useFlowStateSync({
     onMoodChange: (mood) => {
       setCurrentMood(mood);
       setIdeControlled(true);
@@ -191,8 +191,8 @@ export default function Home() {
 
           {/* Dashboard grid */}
           <div className="space-y-8">
-            {/* IDE Connection indicator */}
-            {isConnected && (
+            {/* IDE Connection indicator - only shows when MCP is actively connected */}
+            {isMcpConnected && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}

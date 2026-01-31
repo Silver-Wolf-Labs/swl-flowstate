@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 
+// MCP connection timeout - if no MCP update in this time, consider disconnected
+const MCP_CONNECTION_TIMEOUT = 10000; // 10 seconds
+
 export interface FlowStateSync {
   isRunning: boolean;
   mode: "focus" | "shortBreak" | "longBreak";
@@ -11,6 +14,7 @@ export interface FlowStateSync {
   sessionsCompleted: number;
   totalFocusTime: number;
   lastUpdated: number;
+  lastMcpUpdate: number; // Timestamp of last MCP server update
   scrollTo?: "mood" | "timer" | "music" | "analytics" | null;
 }
 
@@ -24,6 +28,7 @@ interface UseFlowStateSyncOptions {
 export function useFlowStateSync(options: UseFlowStateSyncOptions = {}) {
   const [syncState, setSyncState] = useState<FlowStateSync | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [isMcpConnected, setIsMcpConnected] = useState(false);
   const lastUpdateRef = useRef<number>(0);
   const previousMoodRef = useRef<string | null>(null);
   const previousRunningRef = useRef<boolean | null>(null);
@@ -35,6 +40,11 @@ export function useFlowStateSync(options: UseFlowStateSyncOptions = {}) {
       if (response.ok) {
         const state: FlowStateSync = await response.json();
         setIsConnected(true);
+        
+        // Check if MCP has updated recently (within timeout)
+        const mcpConnected = state.lastMcpUpdate > 0 && 
+          (Date.now() - state.lastMcpUpdate) < MCP_CONNECTION_TIMEOUT;
+        setIsMcpConnected(mcpConnected);
 
         // Only update if state has changed
         if (state.lastUpdated > lastUpdateRef.current) {
@@ -70,6 +80,7 @@ export function useFlowStateSync(options: UseFlowStateSyncOptions = {}) {
       }
     } catch (error) {
       setIsConnected(false);
+      setIsMcpConnected(false);
       console.error("FlowState sync error:", error);
     }
   }, [options]);
@@ -106,6 +117,7 @@ export function useFlowStateSync(options: UseFlowStateSyncOptions = {}) {
   return {
     syncState,
     isConnected,
+    isMcpConnected, // True only if MCP server has sent updates recently
     updateState,
   };
 }
