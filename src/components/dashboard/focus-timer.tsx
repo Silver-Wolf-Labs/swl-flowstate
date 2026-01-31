@@ -206,8 +206,6 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
     const timeSinceLocalChange = Date.now() - lastLocalChangeRef.current;
     const recentLocalChange = timeSinceLocalChange < 1000;
 
-    console.log("[Timer] Sync effect - isMcpUpdate:", isMcpUpdate, "isRunning:", isRunning, "recentLocalChange:", recentLocalChange, "timeSinceLocalChange:", timeSinceLocalChange, "syncState.isRunning:", syncState.isRunning);
-
     if (
       typeof syncState.focusDuration === "number" ||
       typeof syncState.shortBreakDuration === "number" ||
@@ -226,10 +224,8 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
     // 1. It's an MCP update (always apply)
     // 2. Timer is not running AND no recent local change
     const shouldApplyTimerState = isMcpUpdate || (!isRunning && !recentLocalChange);
-    console.log("[Timer] shouldApplyTimerState:", shouldApplyTimerState);
 
     if (shouldApplyTimerState) {
-      console.log("[Timer] APPLYING sync state - setting isRunning to:", syncState.isRunning);
       if (syncState.mode && syncState.mode !== mode) {
         setMode(syncState.mode);
       }
@@ -239,8 +235,6 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
       if (typeof syncState.isRunning === "boolean") {
         setIsRunning(syncState.isRunning);
       }
-    } else {
-      console.log("[Timer] SKIPPING sync state application");
     }
   }, [syncState, config, mode, isRunning]);
 
@@ -259,25 +253,31 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
     }
   }, [isRunning]);
 
+  // Timer countdown effect - only depends on isRunning, not timeLeft
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    if (!isRunning) return;
 
-    console.log("[Timer] Effect running - isRunning:", isRunning, "timeLeft:", timeLeft);
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          // Timer completed
+          clearInterval(interval);
+          return 0;
+        }
+        // Play tick sound in last 10 seconds
+        if (soundEnabled && prev <= 11 && prev > 1) {
+          playNotificationSound("tick");
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
-    if (isRunning && timeLeft > 0) {
-      console.log("[Timer] Starting interval...");
-      interval = setInterval(() => {
-        console.log("[Timer] Interval tick");
-        setTimeLeft((prev) => {
-          const newTime = prev - 1;
-          if (soundEnabled && newTime <= 10 && newTime > 0) {
-            playNotificationSound("tick");
-          }
-          return newTime;
-        });
-      }, 1000);
-    } else if (timeLeft === 0 && isRunning) {
-      console.log("[Timer] Timer completed!");
+    return () => clearInterval(interval);
+  }, [isRunning, soundEnabled]);
+
+  // Handle timer completion
+  useEffect(() => {
+    if (timeLeft === 0 && isRunning) {
       setIsRunning(false);
       
       // Play completion sound
@@ -340,25 +340,18 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
         });
       }
     }
-
-    return () => clearInterval(interval);
-  }, [isRunning, timeLeft, mode, sessions, totalTime, mood, onSessionComplete, soundEnabled, notificationsEnabled, config, updateSyncState]);
+  }, [timeLeft, isRunning, mode, sessions, totalTime, mood, onSessionComplete, soundEnabled, notificationsEnabled, config, updateSyncState]);
 
   const toggleTimer = useCallback(() => {
-    const now = Date.now();
-    console.log("[Timer] Toggle clicked at:", now, "isRunning was:", isRunning);
-    lastLocalChangeRef.current = now;
+    lastLocalChangeRef.current = Date.now();
     const nextRunning = !isRunning;
-    console.log("[Timer] Setting isRunning to:", nextRunning);
     setIsRunning(nextRunning);
-    if (updateSyncState) {
-      updateSyncState({
-        isRunning: nextRunning,
-        mode,
-        timeRemaining: timeLeft,
-        totalTime: config[mode],
-      });
-    }
+    updateSyncState?.({
+      isRunning: nextRunning,
+      mode,
+      timeRemaining: timeLeft,
+      totalTime: config[mode],
+    });
   }, [config, mode, timeLeft, isRunning, updateSyncState]);
 
   const resetTimer = useCallback(() => {
