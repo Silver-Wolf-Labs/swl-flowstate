@@ -24,6 +24,8 @@ import {
 export type MusicService = "spotify" | "apple" | "soundcloud" | "youtube" | null;
 export type MoodType = "focus" | "calm" | "energetic" | "creative";
 
+const SOUNDCLOUD_PLACEHOLDER_IMAGE = "/soundcloud-placeholder.svg";
+
 export interface Track {
   id: string;
   title: string;
@@ -240,7 +242,7 @@ export function useMusic() {
         artist: s.artist,
         album: "SoundCloud",
         duration: 0,
-        imageUrl: "/soundcloud-placeholder.png",
+        imageUrl: SOUNDCLOUD_PLACEHOLDER_IMAGE,
         uri: s.url,
         service: "soundcloud" as const,
       }));
@@ -458,7 +460,7 @@ export function useMusic() {
             artist: s.artist,
             album: "SoundCloud",
             duration: 0,
-            imageUrl: "/soundcloud-placeholder.png",
+            imageUrl: SOUNDCLOUD_PLACEHOLDER_IMAGE,
             uri: s.url,
             service: "soundcloud" as const,
           }));
