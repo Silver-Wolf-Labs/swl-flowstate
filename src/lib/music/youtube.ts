@@ -46,6 +46,12 @@ export const curatedLofiStreams = {
       channelTitle: "Lofi Girl",
       isLive: true,
     },
+    {
+      id: "_k-5U7IeK8g", // Tokyo views livestream
+      title: "Tokyo Views - Live Stream",
+      channelTitle: "Tokyo Views",
+      isLive: true,
+    },
     // Video mixes (shuffled on each load)
     {
       id: "lTRiuFIWV54",

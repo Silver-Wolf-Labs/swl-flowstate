@@ -27,6 +27,9 @@ export interface FlowStateSync {
   mode: "focus" | "shortBreak" | "longBreak";
   timeRemaining: number;
   totalTime: number;
+  focusDuration?: number;
+  shortBreakDuration?: number;
+  longBreakDuration?: number;
   currentMood: "focus" | "calm" | "energetic" | "creative";
   sessionsCompleted: number;
   totalFocusTime: number;
@@ -40,6 +43,9 @@ const defaultState: FlowStateSync = {
   mode: "focus",
   timeRemaining: 25 * 60,
   totalTime: 25 * 60,
+  focusDuration: 25 * 60,
+  shortBreakDuration: 5 * 60,
+  longBreakDuration: 15 * 60,
   currentMood: "focus",
   sessionsCompleted: 0,
   totalFocusTime: 0,

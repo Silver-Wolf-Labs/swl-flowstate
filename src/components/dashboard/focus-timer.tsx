@@ -5,6 +5,7 @@ import { Play, Pause, RotateCcw, Coffee, Brain, Settings, Volume2, VolumeX, Bell
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, Button, Badge, ProgressRing } from "@/components/ui";
 import type { FocusSession } from "@/hooks/use-analytics";
+import type { FlowStateSync } from "@/hooks/use-flowstate-sync";
 
 type TimerMode = "focus" | "shortBreak" | "longBreak";
 
@@ -18,6 +19,51 @@ const defaultConfig: TimerConfig = {
   focus: 25 * 60, // 25 minutes
   shortBreak: 5 * 60, // 5 minutes
   longBreak: 15 * 60, // 15 minutes
+};
+
+const TIMER_CONFIG_STORAGE_KEY = "flowstate_timer_config";
+
+const TIMER_LIMITS: Record<TimerMode, { minSeconds: number; maxSeconds: number }> = {
+  focus: { minSeconds: 60, maxSeconds: 180 * 60 },
+  shortBreak: { minSeconds: 60, maxSeconds: 60 * 60 },
+  longBreak: { minSeconds: 60, maxSeconds: 60 * 60 },
+};
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+const normalizeConfig = (config: Partial<TimerConfig>): TimerConfig => ({
+  focus: clamp(
+    Number.isFinite(config.focus) ? (config.focus as number) : defaultConfig.focus,
+    TIMER_LIMITS.focus.minSeconds,
+    TIMER_LIMITS.focus.maxSeconds
+  ),
+  shortBreak: clamp(
+    Number.isFinite(config.shortBreak) ? (config.shortBreak as number) : defaultConfig.shortBreak,
+    TIMER_LIMITS.shortBreak.minSeconds,
+    TIMER_LIMITS.shortBreak.maxSeconds
+  ),
+  longBreak: clamp(
+    Number.isFinite(config.longBreak) ? (config.longBreak as number) : defaultConfig.longBreak,
+    TIMER_LIMITS.longBreak.minSeconds,
+    TIMER_LIMITS.longBreak.maxSeconds
+  ),
+});
+
+const loadStoredConfig = (): TimerConfig => {
+  if (typeof window === "undefined") return defaultConfig;
+  try {
+    const stored = localStorage.getItem(TIMER_CONFIG_STORAGE_KEY);
+    if (!stored) return defaultConfig;
+    const parsed = JSON.parse(stored) as Partial<TimerConfig>;
+    return normalizeConfig(parsed);
+  } catch {
+    return defaultConfig;
+  }
+};
+
+const persistConfig = (config: TimerConfig) => {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(TIMER_CONFIG_STORAGE_KEY, JSON.stringify(config));
 };
 
 const modeConfig = {
@@ -98,9 +144,12 @@ const showNotification = (title: string, body: string, icon?: string) => {
 interface FocusTimerProps {
   mood?: string;
   onSessionComplete?: (session: Omit<FocusSession, "id">) => void;
+  syncState?: FlowStateSync | null;
+  updateSyncState?: (updates: Partial<FlowStateSync>) => void;
 }
 
-export function FocusTimer({ mood = "focus", onSessionComplete }: FocusTimerProps) {
+export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updateSyncState }: FocusTimerProps) {
+  const [config, setConfig] = useState<TimerConfig>(defaultConfig);
   const [mode, setMode] = useState<TimerMode>("focus");
   const [timeLeft, setTimeLeft] = useState(defaultConfig.focus);
   const [isRunning, setIsRunning] = useState(false);
@@ -109,6 +158,7 @@ export function FocusTimer({ mood = "focus", onSessionComplete }: FocusTimerProp
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const sessionStartRef = useRef<number | null>(null);
+  const lastSyncRef = useRef<number>(0);
   
   // Request notification permission on mount
   useEffect(() => {
@@ -119,7 +169,61 @@ export function FocusTimer({ mood = "focus", onSessionComplete }: FocusTimerProp
     }
   }, []);
 
-  const totalTime = defaultConfig[mode];
+  useEffect(() => {
+    const stored = loadStoredConfig();
+    setConfig(stored);
+  }, []);
+
+  useEffect(() => {
+    if (!updateSyncState) return;
+    const updates: Partial<FlowStateSync> = {
+      focusDuration: config.focus,
+      shortBreakDuration: config.shortBreak,
+      longBreakDuration: config.longBreak,
+    };
+    if (!isRunning) {
+      updates.timeRemaining = config[mode];
+      updates.totalTime = config[mode];
+    }
+    updateSyncState(updates);
+  }, [config, updateSyncState, isRunning, mode]);
+
+  useEffect(() => {
+    if (!isRunning) {
+      setTimeLeft(config[mode]);
+    }
+  }, [config, mode, isRunning]);
+
+  useEffect(() => {
+    if (!syncState || syncState.lastUpdated <= lastSyncRef.current) return;
+    lastSyncRef.current = syncState.lastUpdated;
+
+    if (
+      typeof syncState.focusDuration === "number" ||
+      typeof syncState.shortBreakDuration === "number" ||
+      typeof syncState.longBreakDuration === "number"
+    ) {
+      const nextConfig = normalizeConfig({
+        focus: syncState.focusDuration ?? config.focus,
+        shortBreak: syncState.shortBreakDuration ?? config.shortBreak,
+        longBreak: syncState.longBreakDuration ?? config.longBreak,
+      });
+      setConfig(nextConfig);
+      persistConfig(nextConfig);
+    }
+
+    if (syncState.mode && syncState.mode !== mode) {
+      setMode(syncState.mode);
+    }
+    if (typeof syncState.timeRemaining === "number") {
+      setTimeLeft(syncState.timeRemaining);
+    }
+    if (typeof syncState.isRunning === "boolean") {
+      setIsRunning(syncState.isRunning);
+    }
+  }, [syncState, config, mode]);
+
+  const totalTime = config[mode] || defaultConfig[mode];
   const progress = ((totalTime - timeLeft) / totalTime) * 100;
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
@@ -187,33 +291,97 @@ export function FocusTimer({ mood = "focus", onSessionComplete }: FocusTimerProp
 
       // Auto switch modes
       if (mode === "focus") {
-        setSessions((prev) => prev + 1);
-        const nextMode = (sessions + 1) % 4 === 0 ? "longBreak" : "shortBreak";
+        const nextSessions = sessions + 1;
+        setSessions(nextSessions);
+        const nextMode = nextSessions % 4 === 0 ? "longBreak" : "shortBreak";
+        const nextTime = config[nextMode];
         setMode(nextMode);
-        setTimeLeft(defaultConfig[nextMode]);
+        setTimeLeft(nextTime);
+        updateSyncState?.({
+          isRunning: false,
+          mode: nextMode,
+          timeRemaining: nextTime,
+          totalTime: nextTime,
+        });
       } else {
+        const nextTime = config.focus;
         setMode("focus");
-        setTimeLeft(defaultConfig.focus);
+        setTimeLeft(nextTime);
+        updateSyncState?.({
+          isRunning: false,
+          mode: "focus",
+          timeRemaining: nextTime,
+          totalTime: nextTime,
+        });
       }
     }
 
     return () => clearInterval(interval);
-  }, [isRunning, timeLeft, mode, sessions, totalTime, mood, onSessionComplete, soundEnabled, notificationsEnabled]);
+  }, [isRunning, timeLeft, mode, sessions, totalTime, mood, onSessionComplete, soundEnabled, notificationsEnabled, config, updateSyncState]);
 
   const toggleTimer = useCallback(() => {
-    setIsRunning((prev) => !prev);
-  }, []);
+    setIsRunning((prev) => {
+      const nextRunning = !prev;
+      updateSyncState?.({
+        isRunning: nextRunning,
+        mode,
+        timeRemaining: timeLeft,
+        totalTime: config[mode],
+      });
+      return nextRunning;
+    });
+  }, [config, mode, timeLeft, updateSyncState]);
 
   const resetTimer = useCallback(() => {
     setIsRunning(false);
-    setTimeLeft(defaultConfig[mode]);
-  }, [mode]);
+    const resetTime = config[mode];
+    setTimeLeft(resetTime);
+    updateSyncState?.({
+      isRunning: false,
+      mode,
+      timeRemaining: resetTime,
+      totalTime: resetTime,
+    });
+  }, [config, mode, updateSyncState]);
 
   const switchMode = useCallback((newMode: TimerMode) => {
     setMode(newMode);
-    setTimeLeft(defaultConfig[newMode]);
+    const nextTime = config[newMode];
+    setTimeLeft(nextTime);
     setIsRunning(false);
-  }, []);
+    updateSyncState?.({
+      isRunning: false,
+      mode: newMode,
+      timeRemaining: nextTime,
+      totalTime: nextTime,
+    });
+  }, [config, updateSyncState]);
+
+  const updateDuration = useCallback(
+    (target: TimerMode, minutesValue: number) => {
+      if (!Number.isFinite(minutesValue)) return;
+      const clampedMinutes = clamp(
+        Math.floor(minutesValue),
+        Math.floor(TIMER_LIMITS[target].minSeconds / 60),
+        Math.floor(TIMER_LIMITS[target].maxSeconds / 60)
+      );
+      const nextSeconds = clampedMinutes * 60;
+      const nextConfig = { ...config, [target]: nextSeconds };
+      setConfig(nextConfig);
+      persistConfig(nextConfig);
+      const shouldResetTime = !isRunning && mode === target;
+      updateSyncState?.({
+        focusDuration: nextConfig.focus,
+        shortBreakDuration: nextConfig.shortBreak,
+        longBreakDuration: nextConfig.longBreak,
+        ...(shouldResetTime ? { timeRemaining: nextSeconds, totalTime: nextSeconds } : {}),
+      });
+      if (shouldResetTime) {
+        setTimeLeft(nextSeconds);
+      }
+    },
+    [config, isRunning, mode, updateSyncState]
+  );
 
   const formatTime = (num: number) => num.toString().padStart(2, "0");
 
@@ -390,6 +558,49 @@ export function FocusTimer({ mood = "focus", onSessionComplete }: FocusTimerProp
             >
               <div className="mt-6 p-4 rounded-xl bg-secondary/50 border border-border space-y-4">
                 <h4 className="text-sm font-medium">Timer Settings</h4>
+
+                {/* Duration settings */}
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Session Lengths (minutes)</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <label className="flex flex-col gap-2 text-xs font-medium text-muted-foreground">
+                      Focus
+                      <input
+                        type="number"
+                        min={Math.floor(TIMER_LIMITS.focus.minSeconds / 60)}
+                        max={Math.floor(TIMER_LIMITS.focus.maxSeconds / 60)}
+                        step={1}
+                        value={Math.round(config.focus / 60)}
+                        onChange={(event) => updateDuration("focus", event.target.valueAsNumber)}
+                        className="h-10 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-2 text-xs font-medium text-muted-foreground">
+                      Short Break
+                      <input
+                        type="number"
+                        min={Math.floor(TIMER_LIMITS.shortBreak.minSeconds / 60)}
+                        max={Math.floor(TIMER_LIMITS.shortBreak.maxSeconds / 60)}
+                        step={1}
+                        value={Math.round(config.shortBreak / 60)}
+                        onChange={(event) => updateDuration("shortBreak", event.target.valueAsNumber)}
+                        className="h-10 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-2 text-xs font-medium text-muted-foreground">
+                      Long Break
+                      <input
+                        type="number"
+                        min={Math.floor(TIMER_LIMITS.longBreak.minSeconds / 60)}
+                        max={Math.floor(TIMER_LIMITS.longBreak.maxSeconds / 60)}
+                        step={1}
+                        value={Math.round(config.longBreak / 60)}
+                        onChange={(event) => updateDuration("longBreak", event.target.valueAsNumber)}
+                        className="h-10 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                      />
+                    </label>
+                  </div>
+                </div>
                 
                 <div className="flex flex-col sm:flex-row gap-4">
                   {/* Sound Toggle */}

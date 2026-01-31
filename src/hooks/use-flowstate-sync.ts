@@ -10,6 +10,9 @@ export interface FlowStateSync {
   mode: "focus" | "shortBreak" | "longBreak";
   timeRemaining: number;
   totalTime: number;
+  focusDuration?: number;
+  shortBreakDuration?: number;
+  longBreakDuration?: number;
   currentMood: "focus" | "calm" | "energetic" | "creative";
   sessionsCompleted: number;
   totalFocusTime: number;

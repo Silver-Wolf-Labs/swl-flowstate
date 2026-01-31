@@ -239,7 +239,12 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
             >
-              <FocusTimer mood={currentMood} onSessionComplete={recordSession} />
+              <FocusTimer
+                mood={currentMood}
+                onSessionComplete={recordSession}
+                syncState={syncState}
+                updateSyncState={updateState}
+              />
             </motion.div>
 
             {/* Analytics - full width */}
