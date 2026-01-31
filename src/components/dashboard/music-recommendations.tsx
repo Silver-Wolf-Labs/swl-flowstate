@@ -583,7 +583,7 @@ export function MusicRecommendations({ mood = "focus" }: MusicRecommendationsPro
                     scrolling="no"
                     frameBorder="0"
                     allow="autoplay"
-                    src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(scPlayerUrl || recommendations[0]?.uri || "https://api.soundcloud.com/tracks/293")}&color=%238b5cf6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=true&visual=false`}
+                    src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(scPlayerUrl || recommendations[0]?.uri || "https://soundcloud.com/sc-playlists/sets/lo-fi-chill-beats")}&color=%238b5cf6&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=true&visual=false`}
                     style={{ borderRadius: "12px" }}
                   />
                   <div className="bg-secondary/30 px-3 py-2 text-xs text-muted-foreground flex items-center justify-between">

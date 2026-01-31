@@ -507,20 +507,26 @@ export function useMusic() {
         
         setPlaylists(items);
       } else if (activeService === "soundcloud") {
-        // SoundCloud: get user's playlists
-        const scPlaylists = await soundcloudApi.getMyPlaylists(10);
-        
-        const items: Playlist[] = scPlaylists.map((playlist: SoundCloudPlaylist) => ({
-          id: `sc-${playlist.id}`,
-          name: playlist.title,
-          description: playlist.description || "",
-          imageUrl: playlist.artwork_url || "",
-          trackCount: playlist.track_count,
-          uri: playlist.permalink_url,
-          service: "soundcloud" as const,
-        }));
-        
-        setPlaylists(items);
+        // SoundCloud: check if authenticated
+        if (soundcloudAuth.isAuthenticated()) {
+          // User is logged in - get their playlists
+          const scPlaylists = await soundcloudApi.getMyPlaylists(10);
+          
+          const items: Playlist[] = scPlaylists.map((playlist: SoundCloudPlaylist) => ({
+            id: `sc-${playlist.id}`,
+            name: playlist.title,
+            description: playlist.description || "",
+            imageUrl: playlist.artwork_url || "",
+            trackCount: playlist.track_count,
+            uri: playlist.permalink_url,
+            service: "soundcloud" as const,
+          }));
+          
+          setPlaylists(items);
+        } else {
+          // Not authenticated - use curated playlists (no API call needed)
+          setPlaylists([]);
+        }
       } else if (activeService === "youtube") {
         // YouTube: show curated lofi categories
         const ytPlaylists: Playlist[] = [
