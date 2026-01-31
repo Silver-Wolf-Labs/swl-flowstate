@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { label: "Dashboard", href: "#dashboard" },
-  { label: "Focus", href: "#focus" },
   { label: "Music", href: "#music" },
+  { label: "Focus", href: "#focus" },
   { label: "Analytics", href: "#analytics" },
 ];
 
@@ -80,7 +80,15 @@ export function Header() {
             >
               <Github className="w-5 h-5" />
             </motion.a>
-            <Button variant="gradient" size="sm" className="hidden sm:inline-flex">
+            <Button 
+              variant="gradient" 
+              size="sm" 
+              className="hidden sm:inline-flex"
+              onClick={() => {
+                const dashboard = document.getElementById("dashboard");
+                dashboard?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+            >
               Get Started
             </Button>
 
@@ -123,7 +131,16 @@ export function Header() {
               {item.label}
             </motion.a>
           ))}
-          <Button variant="gradient" size="sm" className="mt-2">
+          <Button 
+            variant="gradient" 
+            size="sm" 
+            className="mt-2"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              const dashboard = document.getElementById("dashboard");
+              dashboard?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+          >
             Get Started
           </Button>
         </nav>
