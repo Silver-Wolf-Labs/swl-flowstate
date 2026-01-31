@@ -6,10 +6,67 @@
 
 ## 🔑 Key Rules
 
-1. **Use MCP tools directly** - Don't make raw HTTP calls. Use the `user-flowstate` MCP server.
-2. **Production URL** - Always use `https://flowstate-swl.vercel.app` (not localhost).
-3. **Update docs** - When adding new MCP tools, ALWAYS update `docs/CHEATSHEET.md`.
-4. **Restart Cursor** - New MCP tools require Cursor restart to load.
+1. **Cursor agents**: Use MCP tools via `user-flowstate` server.
+2. **Codex/other agents**: Use shell fallbacks (see below).
+3. **Production URL** - Always use `https://flowstate-swl.vercel.app` (not localhost).
+4. **Update docs** - When adding new MCP tools, ALWAYS update `docs/CHEATSHEET.md`.
+
+---
+
+## 🚨 For Agents WITHOUT MCP Access (Codex, etc.)
+
+If you don't have MCP tools, use these shell commands:
+
+### Open Dashboard (flowstate init)
+```bash
+open "https://flowstate-swl.vercel.app?fromIDE=true&autoConnect=youtube"
+```
+
+### Start Timer
+```bash
+curl -X POST https://flowstate-swl.vercel.app/api/flowstate \
+  -H "Content-Type: application/json" \
+  -d '{"isRunning": true, "timeRemaining": 1500, "totalTime": 1500, "mode": "focus", "source": "mcp"}'
+```
+Note: `timeRemaining` and `totalTime` are in seconds (1500 = 25 min, 600 = 10 min, 120 = 2 min)
+
+### Pause Timer (preserves time)
+```bash
+# First GET current state
+curl -s https://flowstate-swl.vercel.app/api/flowstate | jq .
+
+# Then POST with isRunning: false (keep the timeRemaining from GET)
+curl -X POST https://flowstate-swl.vercel.app/api/flowstate \
+  -H "Content-Type: application/json" \
+  -d '{"isRunning": false, "source": "mcp"}'
+```
+
+### Resume Timer
+```bash
+curl -X POST https://flowstate-swl.vercel.app/api/flowstate \
+  -H "Content-Type: application/json" \
+  -d '{"isRunning": true, "source": "mcp"}'
+```
+
+### Stop Timer (resets to defaults)
+```bash
+curl -X POST https://flowstate-swl.vercel.app/api/flowstate \
+  -H "Content-Type: application/json" \
+  -d '{"isRunning": false, "timeRemaining": 1500, "totalTime": 1500, "mode": "focus", "source": "mcp"}'
+```
+
+### Set Mood
+```bash
+curl -X POST https://flowstate-swl.vercel.app/api/flowstate \
+  -H "Content-Type: application/json" \
+  -d '{"currentMood": "calm", "source": "mcp"}'
+```
+Options: `focus`, `calm`, `energetic`, `creative`
+
+### Get Current State
+```bash
+curl -s https://flowstate-swl.vercel.app/api/flowstate | jq .
+```
 
 ---
 
