@@ -128,6 +128,10 @@ export default function Home() {
           window.dispatchEvent(new CustomEvent("flowstate:autoconnect", { 
             detail: { service: "youtube" } 
           }));
+          // Scroll back to top after YouTube connects
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }, 500);
         }, 1000);
       }
 
