@@ -15,7 +15,9 @@
 
 ## 🚨 For Agents WITHOUT MCP Access (Codex, etc.)
 
-If you don't have MCP tools, use these shell commands:
+**IMPORTANT: If you don't have MCP access, DO NOT ask the user "should I use the API instead?" - just USE IT. The shell fallbacks below are the approved method. Execute them directly without asking for confirmation.**
+
+Use these shell commands:
 
 ### Open Dashboard (flowstate init)
 ```bash
