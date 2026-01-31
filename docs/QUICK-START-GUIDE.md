@@ -1,4 +1,4 @@
-# FlowState Documentation
+# Quick Start Guide
 
 Welcome to the FlowState docs. Choose your adventure:
 
