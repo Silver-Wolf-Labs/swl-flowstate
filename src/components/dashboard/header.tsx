@@ -13,7 +13,11 @@ const navItems = [
   { label: "Analytics", href: "#analytics" },
 ];
 
-export function Header() {
+interface HeaderProps {
+  onGetStarted?: () => void;
+}
+
+export function Header({ onGetStarted }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -84,10 +88,7 @@ export function Header() {
               variant="gradient" 
               size="sm" 
               className="hidden sm:inline-flex"
-              onClick={() => {
-                const dashboard = document.getElementById("dashboard");
-                dashboard?.scrollIntoView({ behavior: "smooth", block: "start" });
-              }}
+              onClick={onGetStarted}
             >
               Get Started
             </Button>
@@ -137,8 +138,7 @@ export function Header() {
             className="mt-2"
             onClick={() => {
               setMobileMenuOpen(false);
-              const dashboard = document.getElementById("dashboard");
-              dashboard?.scrollIntoView({ behavior: "smooth", block: "start" });
+              onGetStarted?.();
             }}
           >
             Get Started

@@ -159,7 +159,7 @@ export default function Home() {
       <RisingParticles quantity={20} className="z-0" />
 
       {/* Fixed header */}
-      <Header />
+      <Header onGetStarted={() => setShowPricingModal(true)} />
 
       {/* Hero section */}
       <HeroSection onWatchDemo={() => setShowDemoWalkthrough(true)} />
