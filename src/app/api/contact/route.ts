@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialization to avoid build-time errors
+let resend: Resend | null = null;
+function getResend() {
+  if (!resend && process.env.RESEND_API_KEY) {
+    resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resend;
+}
 
 // Email recipient for all contact forms
 const CONTACT_EMAIL = "fabriziomendezalberti@gmail.com";
@@ -103,7 +110,16 @@ Sent from FlowState at ${new Date().toLocaleString()}
     `.trim();
 
     // Send email via Resend
-    const { data, error } = await resend.emails.send({
+    const resendClient = getResend();
+    if (!resendClient) {
+      console.error("Resend API key not configured");
+      return NextResponse.json(
+        { error: "Email service not configured" },
+        { status: 503 }
+      );
+    }
+
+    const { data, error } = await resendClient.emails.send({
       from: "FlowState <onboarding@resend.dev>", // Use your verified domain once set up
       to: [CONTACT_EMAIL],
       replyTo: email,
