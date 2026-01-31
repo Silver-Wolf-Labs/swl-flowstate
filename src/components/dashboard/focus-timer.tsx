@@ -468,7 +468,7 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
                 key={`${minutes}-${seconds}`}
               >
                 <motion.span
-                  key={minutes}
+                  key={`min-${minutes}`}
                   initial={{ y: -20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ type: "spring", stiffness: 300 }}
@@ -483,7 +483,7 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
                   :
                 </motion.span>
                 <motion.span
-                  key={seconds}
+                  key={`sec-${seconds}`}
                   initial={{ y: -20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ type: "spring", stiffness: 300 }}
