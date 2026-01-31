@@ -366,6 +366,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: "resume_focus_session",
+        description: "Resume a paused focus session from where you left off. Use this to continue after pausing.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {},
+        },
+      },
+      {
         name: "stop_focus_session",
         description: "Stop and reset the current focus session. Use this when you want to completely end the session and start fresh.",
         inputSchema: {
@@ -513,8 +521,40 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           {
             type: "text" as const,
             text: wasRunning
-              ? `⏸️ Focus session paused.\n\nTime remaining: ${formatTime(sessionState.timeRemaining)}\nTime spent: ${formatTime(timeSpent)}\n\nSay "resume timer" or "start focusing" to continue.`
+              ? `⏸️ Focus session paused.\n\nTime remaining: ${formatTime(sessionState.timeRemaining)}\nTime spent: ${formatTime(timeSpent)}\n\nSay "resume timer" to continue.`
               : "No active session to pause.",
+          },
+        ],
+      };
+    }
+
+    case "resume_focus_session": {
+      if (sessionState.isRunning) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: "Timer is already running!",
+            },
+          ],
+        };
+      }
+      if (sessionState.timeRemaining <= 0) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: "No paused session to resume. Use 'start timer' to begin a new session.",
+            },
+          ],
+        };
+      }
+      startTimer();
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: `▶️ Focus session resumed!\n\nTime remaining: ${formatTime(sessionState.timeRemaining)}\n\nKeep going, you've got this!`,
           },
         ],
       };
