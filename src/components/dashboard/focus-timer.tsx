@@ -259,7 +259,6 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
       interval = setInterval(() => {
         setTimeLeft((prev) => {
           const newTime = prev - 1;
-          // Play tick sound in last 10 seconds
           if (soundEnabled && newTime <= 10 && newTime > 0) {
             playNotificationSound("tick");
           }
@@ -334,10 +333,9 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
   }, [isRunning, timeLeft, mode, sessions, totalTime, mood, onSessionComplete, soundEnabled, notificationsEnabled, config, updateSyncState]);
 
   const toggleTimer = useCallback(() => {
-    lastLocalChangeRef.current = Date.now(); // Mark local change
+    lastLocalChangeRef.current = Date.now();
     const nextRunning = !isRunning;
     setIsRunning(nextRunning);
-    // Call updateSyncState after setIsRunning to avoid race condition
     updateSyncState?.({
       isRunning: nextRunning,
       mode,
