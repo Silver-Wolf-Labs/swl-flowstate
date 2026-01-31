@@ -189,9 +189,17 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
     updateSyncState(updates);
   }, [config, updateSyncState, isRunning, mode]);
 
+  // Only reset timeLeft when config or mode changes (not on pause)
+  const prevModeRef = useRef(mode);
+  const prevConfigRef = useRef(config);
   useEffect(() => {
-    if (!isRunning) {
-      setTimeLeft(config[mode]);
+    // Only reset if mode or config actually changed (not just isRunning)
+    if (mode !== prevModeRef.current || config[mode] !== prevConfigRef.current[mode]) {
+      if (!isRunning) {
+        setTimeLeft(config[mode]);
+      }
+      prevModeRef.current = mode;
+      prevConfigRef.current = config;
     }
   }, [config, mode, isRunning]);
 
