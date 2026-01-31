@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   Header,
@@ -14,15 +14,143 @@ import {
 } from "@/components/dashboard";
 import { Particles, RisingParticles, DemoModal, PricingModal, DemoWalkthroughModal } from "@/components/ui";
 import { useAnalytics } from "@/hooks";
+import { useFlowStateSync } from "@/hooks/use-flowstate-sync";
 
 export type MoodId = "focus" | "calm" | "energetic" | "creative";
 
+// Get initial mood from URL params (runs before React hydration)
+function getInitialMood(): MoodId {
+  if (typeof window === "undefined") return "focus";
+  const params = new URLSearchParams(window.location.search);
+  const moodParam = params.get("mood");
+  if (moodParam && ["focus", "calm", "energetic", "creative"].includes(moodParam)) {
+    return moodParam as MoodId;
+  }
+  return "focus";
+}
+
 export default function Home() {
-  const [currentMood, setCurrentMood] = useState<MoodId>("focus");
+  const [currentMood, setCurrentMood] = useState<MoodId>(getInitialMood);
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showDemoWalkthrough, setShowDemoWalkthrough] = useState(false);
+  const [ideControlled, setIdeControlled] = useState(false);
+  const urlParamsProcessed = useRef(false);
   const { recordSession } = useAnalytics();
+
+  // Scroll to section helper
+  const scrollToSection = useCallback((target: string) => {
+    const sectionIds: Record<string, string> = {
+      mood: "mood-selector",
+      music: "music",
+      timer: "focus",
+      analytics: "analytics",
+    };
+    const elementId = sectionIds[target] || target;
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+      // Add a highlight effect
+      element.classList.add("ring-2", "ring-primary", "ring-offset-4", "ring-offset-background");
+      setTimeout(() => {
+        element.classList.remove("ring-2", "ring-primary", "ring-offset-4", "ring-offset-background");
+      }, 2000);
+    }
+  }, []);
+
+  // Sync with MCP/IDE
+  const { syncState, isConnected, updateState } = useFlowStateSync({
+    onMoodChange: (mood) => {
+      setCurrentMood(mood);
+      setIdeControlled(true);
+      // Brief indicator that IDE changed the mood
+      setTimeout(() => setIdeControlled(false), 3000);
+    },
+    onScrollRequest: scrollToSection,
+  });
+
+  // Sync mood changes from web UI back to MCP
+  const handleMoodSelect = useCallback((mood: { id: string }) => {
+    const moodId = mood.id as MoodId;
+    setCurrentMood(moodId);
+    updateState({ currentMood: moodId });
+  }, [updateState]);
+
+  // Handle URL parameters from IDE launch - runs once on mount
+  useEffect(() => {
+    if (typeof window === "undefined" || urlParamsProcessed.current) return;
+    
+    const params = new URLSearchParams(window.location.search);
+    const fromIDE = params.get("fromIDE");
+    const autoConnect = params.get("autoConnect");
+    const moodParam = params.get("mood");
+    const scrollToParam = params.get("scrollTo");
+
+    if (fromIDE === "true") {
+      urlParamsProcessed.current = true;
+      setIdeControlled(true);
+      
+      // Set mood from URL (already set by getInitialMood, but ensure it's synced)
+      if (moodParam && ["focus", "calm", "energetic", "creative"].includes(moodParam)) {
+        setCurrentMood(moodParam as MoodId);
+        // Also update the sync state to match
+        fetch("/api/flowstate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ currentMood: moodParam }),
+        }).catch(console.error);
+      }
+
+      // Scroll to section
+      if (scrollToParam) {
+        setTimeout(() => {
+          const sectionIds: Record<string, string> = {
+            mood: "mood-selector",
+            music: "music",
+            timer: "focus",
+            analytics: "analytics",
+          };
+          const elementId = sectionIds[scrollToParam] || scrollToParam;
+          const element = document.getElementById(elementId);
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth", block: "center" });
+            element.classList.add("ring-2", "ring-primary", "ring-offset-4", "ring-offset-background");
+            setTimeout(() => {
+              element.classList.remove("ring-2", "ring-primary", "ring-offset-4", "ring-offset-background");
+            }, 2000);
+          }
+        }, 500);
+      }
+
+      // Auto-connect to YouTube - dispatch custom event for MusicRecommendations
+      if (autoConnect === "youtube") {
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent("flowstate:autoconnect", { 
+            detail: { service: "youtube" } 
+          }));
+        }, 1000);
+      }
+
+      // Clean URL after processing
+      setTimeout(() => {
+        window.history.replaceState({}, "", window.location.pathname);
+      }, 100);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Update mood from sync state - but NOT if URL params just set it
+  useEffect(() => {
+    // Skip if we just processed URL params (they take priority)
+    if (urlParamsProcessed.current) {
+      // Reset the flag after a short delay so future sync updates work
+      setTimeout(() => { urlParamsProcessed.current = false; }, 2000);
+      return;
+    }
+    if (syncState?.currentMood && syncState.currentMood !== currentMood) {
+      setCurrentMood(syncState.currentMood);
+    }
+  }, [syncState?.currentMood]);
 
   return (
     <main className="min-h-screen bg-background">
@@ -63,37 +191,51 @@ export default function Home() {
 
           {/* Dashboard grid */}
           <div className="space-y-8">
+            {/* IDE Connection indicator */}
+            {isConnected && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center justify-center gap-2 text-sm text-muted-foreground"
+              >
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                IDE Connected {ideControlled && <span className="text-primary font-medium">• Controlled by IDE</span>}
+              </motion.div>
+            )}
+
             {/* Mood selector - full width */}
             <motion.div
+              id="mood-selector"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
+              className="transition-all duration-300"
             >
-              <MoodSelector onMoodSelect={(mood) => setCurrentMood(mood.id as MoodId)} />
+              <MoodSelector onMoodSelect={handleMoodSelect} currentMood={currentMood} />
             </motion.div>
 
-            {/* Two column layout */}
-            <div className="grid lg:grid-cols-2 gap-8">
-              {/* Focus Timer */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-              >
-                <FocusTimer mood={currentMood} onSessionComplete={recordSession} />
-              </motion.div>
+            {/* Music Recommendations - full width */}
+            <motion.div
+              id="music"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="transition-all duration-300"
+            >
+              <MusicRecommendations mood={currentMood} />
+            </motion.div>
 
-              {/* Music Recommendations */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
-              >
-                <MusicRecommendations mood={currentMood} />
-              </motion.div>
-            </div>
+            {/* Focus Timer - below music, centered */}
+            <motion.div
+              className="max-w-xl mx-auto w-full"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              <FocusTimer mood={currentMood} onSessionComplete={recordSession} />
+            </motion.div>
 
             {/* Analytics - full width */}
             <motion.div

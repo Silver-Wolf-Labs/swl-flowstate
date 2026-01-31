@@ -60,6 +60,19 @@ export function useAnalytics() {
     return `${formatHour(peakHours.start)}-${formatHour(peakHours.end)}`;
   }, [peakHours]);
 
+  // Getter functions for AI mood detection
+  const getTodayStats = useCallback(() => {
+    return todayStats || { totalFocusTime: 0, sessionsCompleted: 0, tasksCompleted: 0, primaryMood: null };
+  }, [todayStats]);
+
+  const getProductivityScore = useCallback(() => {
+    return productivityScore;
+  }, [productivityScore]);
+
+  const getPeakHours = useCallback(() => {
+    return peakHours;
+  }, [peakHours]);
+
   return {
     // Stats
     todayStats,
@@ -79,6 +92,11 @@ export function useAnalytics() {
     // Helpers
     formatTime,
     getPeakHoursString,
+    
+    // Getters for mood detection
+    getTodayStats,
+    getProductivityScore,
+    getPeakHours,
   };
 }
 

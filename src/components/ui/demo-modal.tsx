@@ -37,17 +37,14 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
     setIsSubmitting(true);
 
     try {
-      // Using Formspree for email handling (free tier)
-      // Replace YOUR_FORM_ID with actual Formspree form ID
-      const response = await fetch("https://formspree.io/f/xyzgkqvl", {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           ...formData,
-          _replyto: formData.email,
-          _subject: `FlowState Demo Request from ${formData.name}`,
+          type: "demo",
         }),
       });
 
@@ -58,6 +55,8 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
           setIsSubmitted(false);
           setFormData({ name: "", email: "", company: "", message: "" });
         }, 2000);
+      } else {
+        throw new Error("Failed to send");
       }
     } catch (error) {
       console.error("Form submission error:", error);
@@ -66,7 +65,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
       const body = encodeURIComponent(
         `Name: ${formData.name}\nEmail: ${formData.email}\nCompany: ${formData.company}\n\nMessage:\n${formData.message}`
       );
-      window.location.href = `mailto:admin@silverwolflabs.com?subject=${subject}&body=${body}`;
+      window.location.href = `mailto:fabriziomendezalberti@gmail.com?subject=${subject}&body=${body}`;
     } finally {
       setIsSubmitting(false);
     }

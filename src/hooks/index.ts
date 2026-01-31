@@ -3,3 +3,6 @@ export type { MusicService, MoodType, Track, Playlist, PlaybackState } from "./u
 
 export { useAnalytics } from "./use-analytics";
 export type { DailyStats, FocusSession } from "./use-analytics";
+
+export { useFlowStateSync } from "./use-flowstate-sync";
+export type { FlowStateSync } from "./use-flowstate-sync";

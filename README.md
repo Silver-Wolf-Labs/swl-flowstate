@@ -1,15 +1,17 @@
-# FlowState - Mood-Adaptive Productivity Dashboard
+# FlowState
+
+### Mood-Adaptive Productivity Dashboard with AI & IDE Integration
 
 <p align="center">
   <img src="https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js" alt="Next.js" />
   <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react" alt="React" />
   <img src="https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Tailwind-4-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS" />
-  <img src="https://img.shields.io/badge/Framer_Motion-12-FF0080?style=for-the-badge&logo=framer" alt="Framer Motion" />
+  <img src="https://img.shields.io/badge/MCP-Enabled-FF6B6B?style=for-the-badge" alt="MCP" />
 </p>
 
 <p align="center">
-  A mood-adaptive productivity dashboard that helps developers and creators stay in flow while coding.
+  <em>Stay in flow while coding. Control your productivity from your IDE or the web.</em>
 </p>
 
 <p align="center">
@@ -18,53 +20,187 @@
 
 ---
 
+## 🎮 Three Ways to Control FlowState
+
+<table>
+<tr>
+<td width="33%" align="center">
+
+### 🖥️ Web Dashboard
+Click buttons directly in the beautiful UI
+
+</td>
+<td width="33%" align="center">
+
+### 🤖 AI Assistant
+Natural language commands in your IDE
+
+</td>
+<td width="33%" align="center">
+
+### ⚡ MCP Tools
+Structured commands for automation
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🚀 IDE Integration (MCP)
+
+FlowState includes a **Model Context Protocol (MCP)** server that lets you control your productivity dashboard directly from **Cursor**, **VS Code**, or any MCP-compatible IDE.
+
+### Quick Start
+
+```bash
+# Say this to your AI assistant:
+"flowstate init"
+```
+
+This opens the dashboard in your browser with YouTube auto-connected and synced to your IDE.
+
+### Natural Language Commands
+
+Just talk to your AI assistant naturally:
+
+| What you say | What happens |
+|--------------|--------------|
+| `"flowstate init"` | Opens dashboard with YouTube connected |
+| `"set my mood to focus"` | Switches to Deep Focus mode |
+| `"I need to concentrate"` | AI suggests and applies optimal mood |
+| `"what mood should I be in?"` | AI analyzes your patterns and suggests |
+| `"start a focus session"` | Begins 25-min pomodoro timer |
+| `"how productive have I been?"` | Shows your stats and insights |
+| `"I'm feeling tired"` | AI suggests Calm mode with reasoning |
+| `"open flowstate with creative mood"` | Opens dashboard in Creative mode |
+
+### Available MCP Tools
+
+| Tool | Description |
+|------|-------------|
+| `open_dashboard` | Launch FlowState in browser with auto-connect |
+| `set_mood` | Change mood (focus, calm, energetic, creative) |
+| `suggest_mood` | AI analyzes and recommends optimal mood |
+| `get_mood_tips` | Get productivity tips for current mood |
+| `start_focus_session` | Start a pomodoro timer |
+| `stop_focus_session` | Stop the current session |
+| `take_break` | Switch to break mode |
+| `skip_break` | Skip break and continue focusing |
+| `get_timer_status` | Check timer state |
+| `get_productivity_stats` | View your productivity metrics |
+
+### Setup for Cursor IDE
+
+Add to your `mcp.json` (or Cursor MCP settings):
+
+```json
+{
+  "mcpServers": {
+    "flowstate": {
+      "command": "/path/to/sw-personal/src/mcp/run-server.sh",
+      "args": []
+    }
+  }
+}
+```
+
+### Real-Time Sync
+
+Changes sync **bidirectionally**:
+- Change mood in IDE → Web UI updates instantly
+- Click buttons in web → IDE state stays current
+- Timer updates flow both directions
+
+---
+
+## 🧠 AI Mood Detection
+
+FlowState uses AI to suggest the optimal mood based on:
+
+| Factor | How it's used |
+|--------|---------------|
+| **Time of Day** | Morning energy, afternoon focus, evening creativity |
+| **Day of Week** | Weekday productivity vs weekend relaxation |
+| **Your Stats** | Sessions completed, focus time, streaks |
+| **Patterns** | Peak productivity hours, session history |
+
+```
+🤖 AI Mood Suggestion
+
+Good evening!
+
+🎨 Recommended: Creative
+📊 Confidence: 78%
+
+Why this mood?
+• Creative time of day (7:00 PM)
+• Low session count today - fresh energy
+• Weekend approaching - relaxed mindset
+
+Quick tip: Try unconventional approaches
+```
+
+---
+
 ## ✨ Features
 
-### 🎯 Mood Detection
-Set your current vibe and watch the dashboard adapt. Choose from:
-- **Deep Focus** - Minimize distractions, maximize output
-- **Energetic** - High energy, fast-paced work
-- **Creative** - Explore ideas, think outside the box
-- **Calm** - Relaxed and steady progress
+### 🎯 Mood Modes
+
+| Mode | Vibe | Best For |
+|------|------|----------|
+| **Deep Focus** | Purple/Violet | Crushing complex problems |
+| **Energetic** | Orange/Amber | High-velocity shipping |
+| **Creative** | Pink/Rose | Exploring new ideas |
+| **Calm** | Teal/Cyan | Steady, relaxed progress |
 
 ### ⏱️ Focus Timer
-Pomodoro-style productivity sessions with:
-- Customizable focus and break durations
-- Visual progress ring with smooth animations
+- Pomodoro-style sessions (25/5 or custom)
+- Visual progress ring with animations
+- **Sound notifications** when sessions end
+- **Browser notifications** for background awareness
 - Auto-switching between focus and break modes
-- Session tracking and statistics
 
 ### 🎵 Vibe Zone
-Curated music recommendations to match your flow:
-- Quick access playlists
-- Track suggestions based on mood
-- Integrated playback controls
-- Multi-platform music integration (Spotify, SoundCloud, Apple Music, YouTube)
+- **YouTube** - 24/7 lofi livestreams
+- **Spotify** - Curated focus playlists
+- **SoundCloud** - Ambient and electronic
+- **Apple Music** - Integrated playback
+- Auto-connects when launching from IDE
 
-### 📊 Analytics Dashboard
-Track your productivity trends:
+### 📊 Analytics
 - Daily focus time tracking
 - Weekly performance charts
-- Activity heatmap visualization
-- AI-powered insights and recommendations
+- Activity heatmap
+- AI-powered insights
 
-### 🎬 Interactive Demo
-- Demo walkthrough modal for new users
-- Pricing modal with plan options
-- Animated particle backgrounds
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Framework** | Next.js 16 (App Router) |
+| **UI** | React 19 + Tailwind CSS 4 |
+| **Animations** | Framer Motion 12 |
+| **Language** | TypeScript 5 |
+| **IDE Integration** | Model Context Protocol (MCP) |
+| **Email** | Resend API |
+
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/flowstate.git
-cd flowstate
+git clone https://github.com/Silver-Wolf-Labs/sw-personal.git
+cd sw-personal
 
 # Install dependencies
 npm install
@@ -73,34 +209,17 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the app.
+Open [http://localhost:3000](http://localhost:3000)
 
-### Build for Production
+### Environment Variables
 
-```bash
-npm run build
-npm start
+Create `.env.local`:
+
+```env
+RESEND_API_KEY=your_resend_api_key
 ```
 
-## 🛠️ Tech Stack
-
-| Technology | Purpose |
-|------------|---------|
-| **Next.js 16** | React framework with App Router |
-| **React 19** | UI library with latest features |
-| **TypeScript 5** | Type-safe development |
-| **Tailwind CSS 4** | Utility-first styling |
-| **Framer Motion 12** | Smooth animations |
-| **Lucide Icons** | Beautiful icon set |
-
-## 🎨 Design Features
-
-- **Dark Mode First** - Easy on the eyes during long coding sessions
-- **Glass Morphism** - Modern, translucent UI elements
-- **Gradient Accents** - Dynamic color highlights
-- **Micro-Animations** - Delightful hover and transition effects
-- **Particle Effects** - Floating and rising particle backgrounds
-- **Responsive Design** - Works on all devices
+---
 
 ## 📁 Project Structure
 
@@ -108,59 +227,44 @@ npm start
 flowstate/
 ├── src/
 │   ├── app/                    # Next.js App Router
-│   │   ├── api/                # API routes
-│   │   │   └── auth/           # OAuth callbacks
-│   │   │       ├── spotify/    # Spotify auth
-│   │   │       └── soundcloud/ # SoundCloud auth
-│   │   ├── globals.css         # Global styles & theme
-│   │   ├── layout.tsx          # Root layout
-│   │   └── page.tsx            # Main dashboard page
+│   │   ├── api/
+│   │   │   ├── contact/        # Email API
+│   │   │   └── flowstate/      # MCP sync endpoint
+│   │   └── page.tsx            # Main dashboard
 │   ├── components/
-│   │   ├── dashboard/          # Dashboard feature components
-│   │   │   ├── analytics-preview.tsx
-│   │   │   ├── features-section.tsx
-│   │   │   ├── focus-timer.tsx
-│   │   │   ├── footer.tsx
-│   │   │   ├── header.tsx
-│   │   │   ├── hero-section.tsx
-│   │   │   ├── mood-selector.tsx
-│   │   │   └── music-recommendations.tsx
-│   │   └── ui/                 # Reusable UI components
-│   │       ├── animated-number.tsx
-│   │       ├── badge.tsx
-│   │       ├── button.tsx
-│   │       ├── card.tsx
-│   │       ├── demo-modal.tsx
-│   │       ├── demo-walkthrough-modal.tsx
-│   │       ├── particles.tsx
-│   │       ├── pricing-modal.tsx
-│   │       └── progress-ring.tsx
-│   ├── hooks/                  # Custom React hooks
-│   │   ├── use-analytics.ts    # Analytics tracking
-│   │   └── use-music.ts        # Music player state
-│   └── lib/
-│       ├── analytics.ts        # Analytics utilities
-│       ├── music/              # Music service integrations
-│       │   ├── apple-music.ts
-│       │   ├── soundcloud.ts
-│       │   ├── spotify.ts
-│       │   └── youtube.ts
-│       └── utils.ts            # Utility functions
-├── public/                     # Static assets
-└── package.json
+│   │   ├── dashboard/          # Feature components
+│   │   └── ui/                 # Reusable UI
+│   ├── hooks/
+│   │   ├── use-analytics.ts
+│   │   ├── use-flowstate-sync.ts  # IDE sync hook
+│   │   └── use-music.ts
+│   ├── lib/
+│   │   ├── mood-detection.ts   # AI mood logic
+│   │   └── music/              # Service integrations
+│   └── mcp/
+│       ├── flowstate-server.ts # MCP server
+│       ├── run-server.sh       # Server launcher
+│       └── README.md           # MCP documentation
+└── mcp-config.json             # Cursor MCP config
 ```
+
+---
 
 ## 🔮 Roadmap
 
+- [x] Spotify, SoundCloud, Apple Music, YouTube integration
+- [x] AI-powered mood detection
+- [x] IDE integration via MCP
+- [x] Real-time web ↔ IDE sync
+- [x] Sound & browser notifications
 - [ ] User authentication
-- [ ] Persistent data storage
-- [x] Spotify API integration
-- [x] SoundCloud integration
-- [x] Apple Music integration
-- [x] YouTube integration
+- [ ] Persistent cloud storage
 - [ ] Browser extension
 - [ ] Mobile app (React Native)
-- [ ] AI-powered mood detection
+- [ ] VS Code extension
+- [ ] IntelliJ plugin
+
+---
 
 ## 📄 License
 
@@ -169,5 +273,9 @@ MIT License - feel free to use this project for your own portfolio or learning p
 ---
 
 <p align="center">
-  <strong>FlowState</strong> · Mood-Adaptive Productivity · Silver Wolf Labs
+  <strong>FlowState</strong> · Control your flow from anywhere
+</p>
+
+<p align="center">
+  <sub>Made with ❤️ and lots of ☕ by Silver Wolf Labs</sub>
 </p>
