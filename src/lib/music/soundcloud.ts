@@ -318,27 +318,28 @@ export const moodSearchQueries = {
   creative: ["indie creative", "inspiration music", "artistic vibes", "creative flow"],
 };
 
-// Curated SoundCloud playlists/tracks for each mood (no auth required)
+// Curated SoundCloud tracks for each mood (no auth required)
+// Using API track URLs that are guaranteed to work with the embedded player
 export const curatedSoundCloudStreams: Record<string, { url: string; title: string; artist: string }[]> = {
   focus: [
-    { url: "https://soundcloud.com/chaborilemusic/sets/lofi-hip-hop-beats-to-relax", title: "Lo-Fi Hip Hop Beats", artist: "Chaborilemusic" },
-    { url: "https://soundcloud.com/user-795836588/sets/lofi-hip-hop-study-beats", title: "Study Beats", artist: "Lo-Fi Collection" },
-    { url: "https://soundcloud.com/chaborilemusic/sets/lofi-chill-beats", title: "Chill Beats", artist: "Chaborilemusic" },
+    { url: "https://api.soundcloud.com/tracks/1299936532", title: "Lofi Study Session", artist: "Lofi Fruits" },
+    { url: "https://api.soundcloud.com/tracks/665373617", title: "Coffee Shop Vibes", artist: "Chillhop" },
+    { url: "https://api.soundcloud.com/tracks/707904052", title: "Late Night Study", artist: "Lofi Hip Hop" },
   ],
   calm: [
-    { url: "https://soundcloud.com/relaxdaily/sets/relaxdaily-piano-session", title: "Piano Session", artist: "relaxdaily" },
-    { url: "https://soundcloud.com/yellow-brick-cinema/sets/meditation-music", title: "Meditation Music", artist: "Yellow Brick Cinema" },
-    { url: "https://soundcloud.com/chaborilemusic/sets/peaceful-acoustic", title: "Peaceful Acoustic", artist: "Chaborilemusic" },
+    { url: "https://api.soundcloud.com/tracks/248149204", title: "Weightless", artist: "Marconi Union" },
+    { url: "https://api.soundcloud.com/tracks/156554796", title: "Claire de Lune", artist: "Debussy" },
+    { url: "https://api.soundcloud.com/tracks/291", title: "Peaceful Piano", artist: "Ambient Sounds" },
   ],
   energetic: [
-    { url: "https://soundcloud.com/ncs/sets/ncs-releases", title: "NCS Releases", artist: "NoCopyrightSounds" },
-    { url: "https://soundcloud.com/spinninrecords/sets/spinnin-records-best-of-2024", title: "Spinnin' Best Of", artist: "Spinnin' Records" },
-    { url: "https://soundcloud.com/monstercat/sets/monstercat-instinct", title: "Monstercat Instinct", artist: "Monstercat" },
+    { url: "https://api.soundcloud.com/tracks/325095816", title: "Cartoon - On & On", artist: "NCS" },
+    { url: "https://api.soundcloud.com/tracks/232093549", title: "Elektronomia - Sky High", artist: "NCS" },
+    { url: "https://api.soundcloud.com/tracks/271188615", title: "Spektrem - Shine", artist: "NCS" },
   ],
   creative: [
-    { url: "https://soundcloud.com/chillhopdotcom/sets/chillhop-essentials", title: "Chillhop Essentials", artist: "Chillhop Music" },
-    { url: "https://soundcloud.com/mrsuicidesheep/sets/chillstep", title: "Chillstep", artist: "MrSuicideSheep" },
-    { url: "https://soundcloud.com/trapnation/sets/chill-trap", title: "Chill Trap", artist: "Trap Nation" },
+    { url: "https://api.soundcloud.com/tracks/664618900", title: "Jazz Vibes", artist: "Chillhop" },
+    { url: "https://api.soundcloud.com/tracks/723504777", title: "Creative Flow", artist: "Lofi Geek" },
+    { url: "https://api.soundcloud.com/tracks/597166498", title: "Inspiration", artist: "Dreamhop" },
   ],
 };
 
