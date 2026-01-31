@@ -9,22 +9,52 @@ const socialLinks = [
   { icon: Linkedin, href: "https://linkedin.com", label: "LinkedIn" },
 ];
 
-const footerLinks = [
+interface FooterLink {
+  label: string;
+  href: string;
+}
+
+interface FooterColumn {
+  title: string;
+  links: FooterLink[];
+}
+
+const footerLinks: FooterColumn[] = [
   {
     title: "Product",
-    links: ["Features", "Pricing", "Changelog", "Roadmap"],
+    links: [
+      { label: "Features", href: "#features" },
+      { label: "Pricing", href: "#pricing" },
+      { label: "Dashboard", href: "#dashboard" },
+      { label: "Analytics", href: "#analytics" },
+    ],
   },
   {
     title: "Resources",
-    links: ["Documentation", "API", "Blog", "Community"],
+    links: [
+      { label: "Documentation", href: "#" },
+      { label: "API", href: "#" },
+      { label: "Blog", href: "#" },
+      { label: "Community", href: "#" },
+    ],
   },
   {
     title: "Company",
-    links: ["About", "Careers", "Contact", "Press"],
+    links: [
+      { label: "About", href: "#" },
+      { label: "Careers", href: "#" },
+      { label: "Contact", href: "mailto:fabriziomendezalberti@gmail.com" },
+      { label: "Press", href: "#" },
+    ],
   },
   {
     title: "Legal",
-    links: ["Privacy", "Terms", "Security", "Cookies"],
+    links: [
+      { label: "Privacy", href: "#" },
+      { label: "Terms", href: "#" },
+      { label: "Security", href: "#" },
+      { label: "Cookies", href: "#" },
+    ],
   },
 ];
 
@@ -86,13 +116,13 @@ export function Footer() {
               <h4 className="font-semibold text-sm mb-4">{column.title}</h4>
               <ul className="space-y-2">
                 {column.links.map((link) => (
-                  <li key={link}>
+                  <li key={link.label}>
                     <motion.a
-                      href="#"
+                      href={link.href}
                       className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                       whileHover={{ x: 4 }}
                     >
-                      {link}
+                      {link.label}
                     </motion.a>
                   </li>
                 ))}

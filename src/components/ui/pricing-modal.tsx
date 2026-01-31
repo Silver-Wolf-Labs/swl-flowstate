@@ -73,13 +73,33 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
     };
   }, [isOpen]);
 
-  const handlePurchase = (planName: string) => {
-    if (planName === "Pro") {
-      // Redirect to Stripe checkout (configure with your Stripe link)
-      // For now, show coming soon or redirect to contact
-      window.open("mailto:admin@silverwolflabs.com?subject=FlowState Pro Subscription Interest", "_blank");
-    } else if (planName === "Team") {
-      window.open("mailto:admin@silverwolflabs.com?subject=FlowState Team Plan Inquiry", "_blank");
+  const handlePurchase = async (planName: string) => {
+    if (planName === "Pro" || planName === "Team") {
+      // Send pricing inquiry via API
+      try {
+        const response = await fetch("/api/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: "Pricing Inquiry",
+            email: "user@flowstate.app",
+            message: `User is interested in the ${planName} plan. Please follow up.`,
+            type: "pricing",
+          }),
+        });
+        
+        if (response.ok) {
+          // For now, redirect to mailto as a fallback UX
+          const subject = encodeURIComponent(`FlowState ${planName} Plan Interest`);
+          const body = encodeURIComponent(`Hi,\n\nI'm interested in the ${planName} plan for FlowState.\n\nPlease send me more information about pricing and features.\n\nThanks!`);
+          window.open(`mailto:fabriziomendezalberti@gmail.com?subject=${subject}&body=${body}`, "_blank");
+        }
+      } catch {
+        // Fallback to mailto
+        const subject = encodeURIComponent(`FlowState ${planName} Plan Interest`);
+        const body = encodeURIComponent(`Hi,\n\nI'm interested in the ${planName} plan for FlowState.\n\nPlease send me more information about pricing and features.\n\nThanks!`);
+        window.open(`mailto:fabriziomendezalberti@gmail.com?subject=${subject}&body=${body}`, "_blank");
+      }
     }
   };
 

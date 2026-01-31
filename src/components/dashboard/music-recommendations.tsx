@@ -98,6 +98,20 @@ export function MusicRecommendations({ mood = "focus" }: MusicRecommendationsPro
   const [ytVideoId, setYtVideoId] = useState<string | null>(null);
   const [userPlaylists, setUserPlaylists] = useState<UserPlaylist[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+  // Listen for auto-connect events from IDE
+  useEffect(() => {
+    const handleAutoConnect = (event: CustomEvent<{ service: string }>) => {
+      if (event.detail.service === "youtube" && !isConnected) {
+        connectYouTube();
+      }
+    };
+
+    window.addEventListener("flowstate:autoconnect", handleAutoConnect as EventListener);
+    return () => {
+      window.removeEventListener("flowstate:autoconnect", handleAutoConnect as EventListener);
+    };
+  }, [connectYouTube, isConnected]);
   const [showAddToPlaylist, setShowAddToPlaylist] = useState<string | null>(null);
   const scContainerRef = useRef<HTMLDivElement>(null);
 
@@ -346,7 +360,7 @@ export function MusicRecommendations({ mood = "focus" }: MusicRecommendationsPro
                 <div className="grid grid-cols-3 gap-3">
                   {userPlaylists.slice(0, 3).map((playlist, index) => (
                     <motion.button
-                      key={playlist.id}
+                      key={`${playlist.id}-${index}`}
                       className={cn(
                         "relative p-4 rounded-xl border border-border/50 text-left group overflow-hidden",
                         playlist.videos.length > 0 

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "flowstate": {
+      "command": "npx",
+      "args": ["tsx", "src/mcp/flowstate-server.ts"]
+    }
+  }
+}
