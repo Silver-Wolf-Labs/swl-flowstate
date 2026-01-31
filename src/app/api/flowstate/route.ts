@@ -15,14 +15,10 @@ function getRedis(): Redis | null {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   
-  console.log("Redis config check - URL exists:", !!url, "Token exists:", !!token);
-  
   if (url && token) {
     redis = new Redis({ url, token });
-    console.log("Redis client initialized");
     return redis;
   }
-  console.log("Redis not configured, using file system");
   return null;
 }
 
@@ -66,8 +62,7 @@ async function readState(): Promise<FlowStateSync> {
       const data = await fs.readFile(STATE_FILE, "utf-8");
       return JSON.parse(data);
     }
-  } catch (error) {
-    console.log("readState error:", error);
+  } catch {
     return defaultState;
   }
 }
@@ -114,9 +109,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ success: true, state: newState });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("FlowState sync error:", errorMessage, error);
-    return NextResponse.json({ error: "Failed to update state", details: errorMessage }, { status: 500 });
+    console.error("FlowState sync error:", error);
+    return NextResponse.json({ error: "Failed to update state" }, { status: 500 });
   }
 }
 
