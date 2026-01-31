@@ -276,9 +276,8 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
           return newTime;
         });
       }, 1000);
-    } else {
-      console.log("[Timer] NOT starting interval - isRunning:", isRunning, "timeLeft:", timeLeft);
     } else if (timeLeft === 0 && isRunning) {
+      console.log("[Timer] Timer completed!");
       setIsRunning(false);
       
       // Play completion sound
