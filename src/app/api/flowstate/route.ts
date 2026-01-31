@@ -7,16 +7,19 @@ import { Redis } from "@upstash/redis";
 const STATE_FILE = path.join(process.cwd(), ".flowstate-state.json");
 const REDIS_KEY = "flowstate:state";
 
-// Check if we're in production with Redis configured
-const isProduction = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN;
-
-// Initialize Redis client only if credentials are available
+// Lazy initialize Redis client
 let redis: Redis | null = null;
-if (isProduction) {
-  redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL!,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-  });
+function getRedis(): Redis | null {
+  if (redis) return redis;
+  
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  
+  if (url && token) {
+    redis = new Redis({ url, token });
+    return redis;
+  }
+  return null;
 }
 
 export interface FlowStateSync {
@@ -47,26 +50,31 @@ const defaultState: FlowStateSync = {
 
 // Read state from Redis (production) or file (development)
 async function readState(): Promise<FlowStateSync> {
+  const redisClient = getRedis();
+  
   try {
-    if (redis) {
+    if (redisClient) {
       // Production: Use Redis
-      const state = await redis.get<FlowStateSync>(REDIS_KEY);
+      const state = await redisClient.get<FlowStateSync>(REDIS_KEY);
       return state || defaultState;
     } else {
       // Development: Use file
       const data = await fs.readFile(STATE_FILE, "utf-8");
       return JSON.parse(data);
     }
-  } catch {
+  } catch (error) {
+    console.log("readState error:", error);
     return defaultState;
   }
 }
 
 // Write state to Redis (production) or file (development)
 async function writeState(state: FlowStateSync): Promise<void> {
-  if (redis) {
+  const redisClient = getRedis();
+  
+  if (redisClient) {
     // Production: Use Redis with 1 hour expiry
-    await redis.set(REDIS_KEY, state, { ex: 3600 });
+    await redisClient.set(REDIS_KEY, state, { ex: 3600 });
   } else {
     // Development: Use file
     await fs.writeFile(STATE_FILE, JSON.stringify(state, null, 2));
