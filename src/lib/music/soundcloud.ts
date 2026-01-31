@@ -97,9 +97,9 @@ export const soundcloudAuth = {
       response_type: "code",
       code_challenge: codeChallenge,
       code_challenge_method: "S256",
-      scope: "non-expiring",
       state: generateRandomString(16),
     });
+    // Note: scope is intentionally omitted (empty) as SoundCloud no longer allows non-expiring tokens
 
     window.location.href = `${SOUNDCLOUD_AUTH_URL}?${params.toString()}`;
   },
