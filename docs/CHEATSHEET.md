@@ -52,6 +52,9 @@ Opens the dashboard with YouTube auto-connected.
 |---------|--------|
 | `"start a focus session"` | Begin 25-min pomodoro |
 | `"start focusing"` | Same as above |
+| `"start timer for 10 minutes"` | Custom duration (10 min) |
+| `"start pomo for 45 min"` | Custom duration (45 min) |
+| `"focus for 30 minutes"` | Custom duration (30 min) |
 | `"stop the timer"` | End current session |
 | `"pause my session"` | Stop focus session |
 
