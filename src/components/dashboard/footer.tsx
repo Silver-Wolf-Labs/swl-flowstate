@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Github, Twitter, Linkedin, Heart, Waves } from "lucide-react";
 
 const socialLinks = [
-  { icon: Github, href: "https://github.com", label: "GitHub" },
+  { icon: Github, href: "https://github.com/Silver-Wolf-Labs/sw-personal", label: "GitHub" },
   { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
   { icon: Linkedin, href: "https://linkedin.com", label: "LinkedIn" },
 ];

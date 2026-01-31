@@ -75,7 +75,7 @@ export function Header({ onGetStarted }: HeaderProps) {
           {/* Actions */}
           <div className="flex items-center gap-3">
             <motion.a
-              href="https://github.com"
+              href="https://github.com/Silver-Wolf-Labs/sw-personal"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl bg-secondary hover:bg-secondary/80 transition-colors"
