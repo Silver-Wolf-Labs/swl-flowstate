@@ -159,6 +159,7 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
   const [showSettings, setShowSettings] = useState(false);
   const sessionStartRef = useRef<number | null>(null);
   const lastSyncRef = useRef<number>(0);
+  const lastLocalChangeRef = useRef<number>(0); // Track local changes to avoid sync race conditions
   
   // Request notification permission on mount
   useEffect(() => {
@@ -200,6 +201,9 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
 
     const isMcpUpdate =
       syncState.lastMcpUpdate > 0 && syncState.lastMcpUpdate === syncState.lastUpdated;
+    
+    // Skip sync if there was a recent local change (within 1 second) to avoid race conditions
+    const recentLocalChange = Date.now() - lastLocalChangeRef.current < 1000;
 
     if (
       typeof syncState.focusDuration === "number" ||
@@ -215,7 +219,10 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
       persistConfig(nextConfig);
     }
 
-    const shouldApplyTimerState = isMcpUpdate || !isRunning;
+    // Only apply timer state from sync if:
+    // 1. It's an MCP update (always apply)
+    // 2. Timer is not running AND no recent local change
+    const shouldApplyTimerState = isMcpUpdate || (!isRunning && !recentLocalChange);
 
     if (shouldApplyTimerState) {
       if (syncState.mode && syncState.mode !== mode) {
@@ -327,19 +334,20 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
   }, [isRunning, timeLeft, mode, sessions, totalTime, mood, onSessionComplete, soundEnabled, notificationsEnabled, config, updateSyncState]);
 
   const toggleTimer = useCallback(() => {
-    setIsRunning((prev) => {
-      const nextRunning = !prev;
-      updateSyncState?.({
-        isRunning: nextRunning,
-        mode,
-        timeRemaining: timeLeft,
-        totalTime: config[mode],
-      });
-      return nextRunning;
+    lastLocalChangeRef.current = Date.now(); // Mark local change
+    const nextRunning = !isRunning;
+    setIsRunning(nextRunning);
+    // Call updateSyncState after setIsRunning to avoid race condition
+    updateSyncState?.({
+      isRunning: nextRunning,
+      mode,
+      timeRemaining: timeLeft,
+      totalTime: config[mode],
     });
-  }, [config, mode, timeLeft, updateSyncState]);
+  }, [config, mode, timeLeft, isRunning, updateSyncState]);
 
   const resetTimer = useCallback(() => {
+    lastLocalChangeRef.current = Date.now(); // Mark local change
     setIsRunning(false);
     const resetTime = config[mode];
     setTimeLeft(resetTime);
@@ -352,6 +360,7 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
   }, [config, mode, updateSyncState]);
 
   const switchMode = useCallback((newMode: TimerMode) => {
+    lastLocalChangeRef.current = Date.now(); // Mark local change
     setMode(newMode);
     const nextTime = config[newMode];
     setTimeLeft(nextTime);
