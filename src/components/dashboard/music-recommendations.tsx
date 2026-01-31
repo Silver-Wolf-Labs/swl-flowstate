@@ -302,20 +302,16 @@ export function MusicRecommendations({ mood = "focus" }: MusicRecommendationsPro
                     Coming soon...
                   </div>
                 </div>
-                <div className="relative group">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    disabled
-                    className="bg-[#FF5500]/5 border-[#FF5500]/20 opacity-50 cursor-not-allowed"
-                  >
-                    <SoundCloudIcon className="w-4 h-4 mr-2 text-[#FF5500]/50" />
-                    SoundCloud
-                  </Button>
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-secondary border border-border rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                    Coming soon...
-                  </div>
-                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={connectSoundCloud}
+                  disabled={isLoading}
+                  className="bg-[#FF5500]/10 border-[#FF5500]/30 hover:bg-[#FF5500]/20"
+                >
+                  <SoundCloudIcon className="w-4 h-4 mr-2 text-[#FF5500]" />
+                  SoundCloud
+                </Button>
               </>
             )}
           </div>
