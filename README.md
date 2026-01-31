@@ -277,8 +277,7 @@ flowstate/
 
 ## 📄 License
 
-MIT License - feel free to use this project for your own portfolio or learning purposes.
-
+This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
 ---
 
 <p align="center">
