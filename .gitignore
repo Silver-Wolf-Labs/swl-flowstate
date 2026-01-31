@@ -42,3 +42,4 @@ next-env.d.ts
 
 # FlowState sync state
 .flowstate-state.json
+.env*.local

@@ -22,8 +22,8 @@ import {
   ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 
-// Web app sync URL
-const WEB_APP_URL = process.env.FLOWSTATE_WEB_URL || "http://localhost:3000";
+// Web app sync URL - defaults to production, set FLOWSTATE_WEB_URL=http://localhost:3000 for local dev
+const WEB_APP_URL = process.env.FLOWSTATE_WEB_URL || "https://flowstate-swl.vercel.app";
 
 // Sync state with web app
 async function syncWithWebApp(updates: Record<string, unknown>, scrollTo?: string) {
@@ -699,7 +699,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         sessionState.currentMood = mood;
       }
 
-      // Build URL with query params
+      // Build URL with query params - NO scrollTo, page opens at top
       const params = new URLSearchParams();
       params.set("fromIDE", "true");
       if (autoConnectYoutube) {
@@ -708,11 +708,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       if (mood) {
         params.set("mood", mood);
       }
-      params.set("scrollTo", "music");
+      // Don't set scrollTo - let page open at top, scroll happens on specific commands
 
       const url = `${WEB_APP_URL}?${params.toString()}`;
 
-      // Sync state to web app
+      // Sync state to web app (no scrollTo)
       await syncWithWebApp({
         currentMood: sessionState.currentMood,
         isRunning: sessionState.isRunning,
@@ -721,7 +721,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         totalTime: sessionState.totalTime,
         sessionsCompleted: sessionState.sessionsCompleted,
         totalFocusTime: sessionState.totalFocusTime,
-      }, "music");
+      });
 
       // Open browser using system command
       const { exec } = await import("child_process");
