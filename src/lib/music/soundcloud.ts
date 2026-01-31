@@ -318,6 +318,35 @@ export const moodSearchQueries = {
   creative: ["indie creative", "inspiration music", "artistic vibes", "creative flow"],
 };
 
+// Curated SoundCloud playlists/tracks for each mood (no auth required)
+export const curatedSoundCloudStreams: Record<string, { url: string; title: string; artist: string }[]> = {
+  focus: [
+    { url: "https://soundcloud.com/chaborilemusic/sets/lofi-hip-hop-beats-to-relax", title: "Lo-Fi Hip Hop Beats", artist: "Chaborilemusic" },
+    { url: "https://soundcloud.com/user-795836588/sets/lofi-hip-hop-study-beats", title: "Study Beats", artist: "Lo-Fi Collection" },
+    { url: "https://soundcloud.com/chaborilemusic/sets/lofi-chill-beats", title: "Chill Beats", artist: "Chaborilemusic" },
+  ],
+  calm: [
+    { url: "https://soundcloud.com/relaxdaily/sets/relaxdaily-piano-session", title: "Piano Session", artist: "relaxdaily" },
+    { url: "https://soundcloud.com/yellow-brick-cinema/sets/meditation-music", title: "Meditation Music", artist: "Yellow Brick Cinema" },
+    { url: "https://soundcloud.com/chaborilemusic/sets/peaceful-acoustic", title: "Peaceful Acoustic", artist: "Chaborilemusic" },
+  ],
+  energetic: [
+    { url: "https://soundcloud.com/ncs/sets/ncs-releases", title: "NCS Releases", artist: "NoCopyrightSounds" },
+    { url: "https://soundcloud.com/spinninrecords/sets/spinnin-records-best-of-2024", title: "Spinnin' Best Of", artist: "Spinnin' Records" },
+    { url: "https://soundcloud.com/monstercat/sets/monstercat-instinct", title: "Monstercat Instinct", artist: "Monstercat" },
+  ],
+  creative: [
+    { url: "https://soundcloud.com/chillhopdotcom/sets/chillhop-essentials", title: "Chillhop Essentials", artist: "Chillhop Music" },
+    { url: "https://soundcloud.com/mrsuicidesheep/sets/chillstep", title: "Chillstep", artist: "MrSuicideSheep" },
+    { url: "https://soundcloud.com/trapnation/sets/chill-trap", title: "Chill Trap", artist: "Trap Nation" },
+  ],
+};
+
+// Get curated SoundCloud streams for a mood
+export function getCuratedSoundCloudStreams(mood: string) {
+  return curatedSoundCloudStreams[mood] || curatedSoundCloudStreams.focus;
+}
+
 // Get mood-based playlists (public search)
 export async function getMoodPlaylists(
   mood: "focus" | "calm" | "energetic" | "creative",

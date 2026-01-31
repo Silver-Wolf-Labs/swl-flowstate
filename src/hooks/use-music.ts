@@ -220,14 +220,36 @@ export function useMusic() {
     }
   }, []);
 
-  // Connect to SoundCloud (OAuth)
+  // Connect to SoundCloud (no auth needed for embedded player)
   const connectSoundCloud = useCallback(async () => {
     try {
       setError(null);
-      await soundcloudAuth.login();
+      setIsLoading(true);
+      
+      // SoundCloud embedded player works without auth
+      setActiveService("soundcloud");
+      setIsConnected(true);
+      
+      // Import curated streams dynamically
+      const { getCuratedSoundCloudStreams } = await import("@/lib/music/soundcloud");
+      const streams = getCuratedSoundCloudStreams("focus");
+      
+      const tracks: Track[] = streams.map((s, i) => ({
+        id: `sc-${i}`,
+        title: s.title,
+        artist: s.artist,
+        album: "SoundCloud",
+        duration: 0,
+        imageUrl: "/soundcloud-placeholder.png",
+        uri: s.url,
+        service: "soundcloud" as const,
+      }));
+      setRecommendations(tracks);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to connect to SoundCloud";
       setError(message);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -426,17 +448,18 @@ export function useMusic() {
           
           setRecommendations(tracks);
         } else if (activeService === "soundcloud") {
-          // SoundCloud: search for mood-based tracks
-          const scTracks = await getMoodTracks(mood, 10);
+          // SoundCloud: use curated streams (no API auth needed)
+          const { getCuratedSoundCloudStreams } = await import("@/lib/music/soundcloud");
+          const streams = getCuratedSoundCloudStreams(mood);
           
-          const tracks: Track[] = scTracks.map((t: SoundCloudTrack) => ({
-            id: `sc-${t.id}`,
-            title: t.title,
-            artist: t.user?.username || "Unknown",
-            album: t.genre || "",
-            duration: t.duration,
-            imageUrl: t.artwork_url || "",
-            uri: t.permalink_url,
+          const tracks: Track[] = streams.map((s, i) => ({
+            id: `sc-${mood}-${i}`,
+            title: s.title,
+            artist: s.artist,
+            album: "SoundCloud",
+            duration: 0,
+            imageUrl: "/soundcloud-placeholder.png",
+            uri: s.url,
             service: "soundcloud" as const,
           }));
           
