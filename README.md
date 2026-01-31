@@ -155,7 +155,7 @@ Quick tip: Try unconventional approaches
 | **Calm** | Teal/Cyan | Steady, relaxed progress |
 
 ### ⏱️ Focus Timer
-- Pomodoro-style sessions (25/5 or custom)
+- Pomodoro-style sessions with custom focus, short break, and long break durations
 - Visual progress ring with animations
 - **Sound notifications** when sessions end
 - **Browser notifications** for background awareness
@@ -213,10 +213,17 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### Environment Variables
 
-Create `.env.local`:
+Create `.env.local` (see `.env.example` for the full list):
 
 ```env
 RESEND_API_KEY=your_resend_api_key
+NEXT_PUBLIC_SPOTIFY_CLIENT_ID=your_spotify_client_id_here
+NEXT_PUBLIC_APPLE_MUSIC_DEVELOPER_TOKEN=your_apple_music_token_here
+NEXT_PUBLIC_SOUNDCLOUD_CLIENT_ID=your_soundcloud_client_id_here
+NEXT_PUBLIC_YOUTUBE_API_KEY=your_youtube_api_key_here
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+UPSTASH_REDIS_REST_URL=your_upstash_redis_url
+UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
 ```
 
 ---
@@ -247,22 +254,6 @@ flowstate/
 │       └── README.md           # MCP documentation
 └── mcp-config.json             # Cursor MCP config
 ```
-
----
-
-## 🔮 Roadmap
-
-- [x] Spotify, SoundCloud, Apple Music, YouTube integration
-- [x] AI-powered mood detection
-- [x] IDE integration via MCP
-- [x] Real-time web ↔ IDE sync
-- [x] Sound & browser notifications
-- [ ] User authentication
-- [ ] Persistent cloud storage
-- [ ] Browser extension
-- [ ] Mobile app (React Native)
-- [ ] VS Code extension
-- [ ] IntelliJ plugin
 
 ---
 
