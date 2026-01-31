@@ -37,7 +37,7 @@ An MCP (Model Context Protocol) server that integrates FlowState productivity fe
 {
   "flowstate": {
     "command": "npx",
-    "args": ["tsx", "/path/to/sw-personal/src/mcp/flowstate-server.ts"]
+    "args": ["tsx", "/path/to/swl-flowstate/src/mcp/flowstate-server.ts"]
   }
 }
 ```
@@ -49,7 +49,7 @@ Or copy the contents from `mcp-config.json` in the project root.
 If using an MCP extension for VS Code, configure it to run:
 
 ```bash
-npx tsx /path/to/sw-personal/src/mcp/flowstate-server.ts
+npx tsx /path/to/swl-flowstate/src/mcp/flowstate-server.ts
 ```
 
 ## Usage Examples
@@ -77,7 +77,7 @@ Once configured, you can ask your AI assistant things like:
 To run the server manually for testing:
 
 ```bash
-cd sw-personal
+cd swl-flowstate
 npx tsx src/mcp/flowstate-server.ts
 ```
 

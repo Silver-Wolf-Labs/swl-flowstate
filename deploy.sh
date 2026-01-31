@@ -11,7 +11,7 @@ if [ -n "$DEPLOY_URL" ]; then
   npx vercel alias "$DEPLOY_URL" flowstate-swl.vercel.app
   
   echo "✅ Done! Live at:"
-  echo "   - https://sw-personal.vercel.app"
+  echo "   - https://swl-flowstate.vercel.app"
   echo "   - https://flowstate-swl.vercel.app"
 else
   echo "❌ Deployment failed"

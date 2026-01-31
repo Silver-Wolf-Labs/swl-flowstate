@@ -251,7 +251,7 @@ When adding a new MCP tool:
 
 - **Production**: https://flowstate-swl.vercel.app
 - **API Endpoint**: https://flowstate-swl.vercel.app/api/flowstate
-- **GitHub**: https://github.com/Silver-Wolf-Labs/sw-personal
+- **GitHub**: https://github.com/Silver-Wolf-Labs/swl-flowstate
 
 ---
 

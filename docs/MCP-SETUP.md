@@ -32,7 +32,7 @@ Add to your `mcp.json`:
 {
   "mcpServers": {
     "flowstate": {
-      "command": "/absolute/path/to/sw-personal/src/mcp/run-server.sh",
+      "command": "/absolute/path/to/swl-flowstate/src/mcp/run-server.sh",
       "args": []
     }
   }

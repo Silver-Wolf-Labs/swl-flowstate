@@ -98,7 +98,7 @@ Add to your `mcp.json` (or Cursor MCP settings):
 {
   "mcpServers": {
     "flowstate": {
-      "command": "/path/to/sw-personal/src/mcp/run-server.sh",
+      "command": "/path/to/swl-flowstate/src/mcp/run-server.sh",
       "args": []
     }
   }
@@ -199,8 +199,8 @@ Quick tip: Try unconventional approaches
 
 ```bash
 # Clone the repository
-git clone https://github.com/Silver-Wolf-Labs/sw-personal.git
-cd sw-personal
+git clone https://github.com/Silver-Wolf-Labs/swl-flowstate.git
+cd swl-flowstate
 
 # Install dependencies
 npm install
