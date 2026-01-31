@@ -33,7 +33,9 @@ export function useAnalytics() {
   // Record a focus session
   const recordSession = useCallback(
     (session: Omit<FocusSession, "id">) => {
+      console.log("[useAnalytics] recordSession called with:", session);
       analyticsService.recordSession(session);
+      console.log("[useAnalytics] After recordSession - localStorage data:", analyticsService.getData());
       refreshData();
     },
     [refreshData]

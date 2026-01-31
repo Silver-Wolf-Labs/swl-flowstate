@@ -310,14 +310,18 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
       // Record completed session
       if (sessionStartRef.current && onSessionComplete) {
         const endTime = Date.now();
-        onSessionComplete({
+        const sessionData = {
           startTime: sessionStartRef.current,
           endTime,
           duration: totalTime,
           type: mode,
           mood,
           completed: true,
-        });
+        };
+        console.log("[FocusTimer] Recording session:", sessionData);
+        onSessionComplete(sessionData);
+      } else {
+        console.log("[FocusTimer] Session NOT recorded - sessionStartRef:", sessionStartRef.current, "onSessionComplete:", !!onSessionComplete);
       }
       sessionStartRef.current = null;
 

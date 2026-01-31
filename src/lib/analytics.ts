@@ -75,8 +75,10 @@ export const analyticsService = {
 
   // Record a completed focus session
   recordSession(session: Omit<FocusSession, "id">): void {
+    console.log("[analyticsService] recordSession called");
     const data = this.getData();
     const today = getTodayDate();
+    console.log("[analyticsService] today:", today, "current data:", data);
 
     // Add session
     const newSession: FocusSession = {
@@ -127,6 +129,7 @@ export const analyticsService = {
       }
     }
 
+    console.log("[analyticsService] Saving data:", data);
     this.saveData(data);
   },
 
