@@ -72,10 +72,38 @@ const modeConfig = {
   longBreak: { label: "Long Break", icon: Coffee, color: "accent" as const },
 };
 
+// Shared AudioContext for Safari compatibility
+let sharedAudioContext: AudioContext | null = null;
+
+const getAudioContext = (): AudioContext | null => {
+  if (typeof window === "undefined") return null;
+  
+  if (!sharedAudioContext) {
+    try {
+      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (AudioContextClass) {
+        sharedAudioContext = new AudioContextClass();
+      }
+    } catch {
+      console.warn("AudioContext not supported");
+      return null;
+    }
+  }
+  
+  // Resume if suspended (Safari requires this after user interaction)
+  if (sharedAudioContext && sharedAudioContext.state === "suspended") {
+    sharedAudioContext.resume();
+  }
+  
+  return sharedAudioContext;
+};
+
 // Sound notification using Web Audio API
 const playNotificationSound = (type: "complete" | "break" | "tick") => {
   try {
-    const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    const audioContext = getAudioContext();
+    if (!audioContext) return;
+    
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
@@ -87,16 +115,18 @@ const playNotificationSound = (type: "complete" | "break" | "tick") => {
       const frequencies = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
       frequencies.forEach((freq, i) => {
         setTimeout(() => {
-          const osc = audioContext.createOscillator();
-          const gain = audioContext.createGain();
+          const ctx = getAudioContext();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
           osc.connect(gain);
-          gain.connect(audioContext.destination);
-          osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+          gain.connect(ctx.destination);
+          osc.frequency.setValueAtTime(freq, ctx.currentTime);
           osc.type = "sine";
-          gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-          osc.start(audioContext.currentTime);
-          osc.stop(audioContext.currentTime + 0.5);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.5);
         }, i * 150);
       });
     } else if (type === "break") {
@@ -175,25 +205,8 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
     setConfig(stored);
   }, []);
 
-  // Sync config changes to backend (only config, not timer state)
-  const prevSyncConfigRef = useRef(config);
-  useEffect(() => {
-    if (!updateSyncState) return;
-    // Only sync when config actually changes
-    if (
-      config.focus === prevSyncConfigRef.current.focus &&
-      config.shortBreak === prevSyncConfigRef.current.shortBreak &&
-      config.longBreak === prevSyncConfigRef.current.longBreak
-    ) {
-      return;
-    }
-    prevSyncConfigRef.current = config;
-    updateSyncState({
-      focusDuration: config.focus,
-      shortBreakDuration: config.shortBreak,
-      longBreakDuration: config.longBreak,
-    });
-  }, [config, updateSyncState]);
+  // NOTE: Timer config is intentionally NOT synced to backend
+  // Each device maintains its own timer settings in localStorage
 
   // Only reset timeLeft when config or mode changes (not on pause)
   const prevModeRef = useRef(mode);
@@ -209,6 +222,7 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
     }
   }, [config, mode, isRunning]);
 
+  // Only apply timer state from MCP updates - config is always local
   useEffect(() => {
     if (!syncState || syncState.lastUpdated <= lastSyncRef.current) return;
     lastSyncRef.current = syncState.lastUpdated;
@@ -216,23 +230,24 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
     const isMcpUpdate =
       syncState.lastMcpUpdate > 0 && syncState.lastMcpUpdate === syncState.lastUpdated;
     
-    if (
-      typeof syncState.focusDuration === "number" ||
-      typeof syncState.shortBreakDuration === "number" ||
-      typeof syncState.longBreakDuration === "number"
-    ) {
-      const nextConfig = normalizeConfig({
-        focus: syncState.focusDuration ?? config.focus,
-        shortBreak: syncState.shortBreakDuration ?? config.shortBreak,
-        longBreak: syncState.longBreakDuration ?? config.longBreak,
-      });
-      setConfig(nextConfig);
-      persistConfig(nextConfig);
-    }
-
     // Only apply timer state from sync if it's an MCP update
-    // Local UI is the source of truth for user interactions
+    // Config and local UI interactions are device-local
     if (isMcpUpdate) {
+      // Apply config from MCP if provided
+      if (
+        typeof syncState.focusDuration === "number" ||
+        typeof syncState.shortBreakDuration === "number" ||
+        typeof syncState.longBreakDuration === "number"
+      ) {
+        const nextConfig = normalizeConfig({
+          focus: syncState.focusDuration ?? config.focus,
+          shortBreak: syncState.shortBreakDuration ?? config.shortBreak,
+          longBreak: syncState.longBreakDuration ?? config.longBreak,
+        });
+        setConfig(nextConfig);
+        persistConfig(nextConfig);
+      }
+      
       if (syncState.mode && syncState.mode !== mode) {
         setMode(syncState.mode);
       }
@@ -356,6 +371,12 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
   const toggleTimer = useCallback(() => {
     lastLocalChangeRef.current = Date.now();
     const nextRunning = !isRunning;
+    
+    // Unlock AudioContext on user interaction (required for Safari)
+    if (nextRunning) {
+      getAudioContext();
+    }
+    
     setIsRunning(nextRunning);
     updateSyncState?.({
       isRunning: nextRunning,
@@ -663,7 +684,7 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
                     onClick={async () => {
                       if (!notificationsEnabled) {
                         await requestNotificationPermission();
-                        if (Notification.permission === "granted") {
+                        if (typeof Notification !== "undefined" && Notification.permission === "granted") {
                           setNotificationsEnabled(true);
                         }
                       } else {
@@ -686,7 +707,7 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
                       <div className="text-xs opacity-70">
                         {notificationsEnabled 
                           ? "Enabled" 
-                          : Notification.permission === "denied" 
+                          : (typeof Notification !== "undefined" && Notification.permission === "denied")
                             ? "Blocked" 
                             : "Click to enable"}
                       </div>
