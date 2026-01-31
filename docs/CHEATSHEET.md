@@ -57,6 +57,8 @@ Opens the dashboard with YouTube auto-connected.
 | `"focus for 30 minutes"` | Custom duration (30 min) |
 | `"pause the timer"` | Pause, keep remaining time |
 | `"pause my session"` | Same as above |
+| `"resume timer"` | Continue from where you paused |
+| `"continue focusing"` | Same as above |
 | `"stop the timer"` | Stop and reset timer |
 | `"stop my session"` | Same as above |
 
@@ -115,17 +117,18 @@ Opens the dashboard with YouTube auto-connected.
 For automation and scripting, these are the raw MCP tools:
 
 ```
-open_dashboard      - Launch web UI
-set_mood            - Change mood state  
-suggest_mood        - AI mood recommendation
-get_mood_tips       - Productivity tips
-start_focus_session - Begin timer
-pause_focus_session - Pause timer (keeps time)
-stop_focus_session  - Stop and reset timer
-take_break          - Switch to break
-skip_break          - Skip break mode
-reset_timer_config  - Reset timer to defaults (25/5/15)
-get_timer_status    - Timer info
+open_dashboard       - Launch web UI
+set_mood             - Change mood state  
+suggest_mood         - AI mood recommendation
+get_mood_tips        - Productivity tips
+start_focus_session  - Begin timer
+pause_focus_session  - Pause timer (keeps time)
+resume_focus_session - Resume paused timer
+stop_focus_session   - Stop and reset timer
+take_break           - Switch to break
+skip_break           - Skip break mode
+reset_timer_config   - Reset to defaults (25/5/15)
+get_timer_status     - Timer info
 get_productivity_stats - Analytics data
 ```
 
