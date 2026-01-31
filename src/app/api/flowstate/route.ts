@@ -1,9 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
+import { Redis } from "@upstash/redis";
 
-// State file path (in project root)
+// State file path for local development
 const STATE_FILE = path.join(process.cwd(), ".flowstate-state.json");
+const REDIS_KEY = "flowstate:state";
+
+// Check if we're in production with Redis configured
+const isProduction = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN;
+
+// Initialize Redis client only if credentials are available
+let redis: Redis | null = null;
+if (isProduction) {
+  redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL!,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  });
+}
 
 export interface FlowStateSync {
   isRunning: boolean;
@@ -14,7 +28,7 @@ export interface FlowStateSync {
   sessionsCompleted: number;
   totalFocusTime: number;
   lastUpdated: number;
-  lastMcpUpdate: number; // Timestamp of last MCP server update
+  lastMcpUpdate: number;
   scrollTo?: "mood" | "timer" | "music" | "analytics" | null;
 }
 
@@ -27,21 +41,36 @@ const defaultState: FlowStateSync = {
   sessionsCompleted: 0,
   totalFocusTime: 0,
   lastUpdated: Date.now(),
-  lastMcpUpdate: 0, // No MCP connection initially
+  lastMcpUpdate: 0,
   scrollTo: null,
 };
 
+// Read state from Redis (production) or file (development)
 async function readState(): Promise<FlowStateSync> {
   try {
-    const data = await fs.readFile(STATE_FILE, "utf-8");
-    return JSON.parse(data);
+    if (redis) {
+      // Production: Use Redis
+      const state = await redis.get<FlowStateSync>(REDIS_KEY);
+      return state || defaultState;
+    } else {
+      // Development: Use file
+      const data = await fs.readFile(STATE_FILE, "utf-8");
+      return JSON.parse(data);
+    }
   } catch {
     return defaultState;
   }
 }
 
+// Write state to Redis (production) or file (development)
 async function writeState(state: FlowStateSync): Promise<void> {
-  await fs.writeFile(STATE_FILE, JSON.stringify(state, null, 2));
+  if (redis) {
+    // Production: Use Redis with 1 hour expiry
+    await redis.set(REDIS_KEY, state, { ex: 3600 });
+  } else {
+    // Development: Use file
+    await fs.writeFile(STATE_FILE, JSON.stringify(state, null, 2));
+  }
 }
 
 // GET - Read current state
@@ -80,6 +109,7 @@ export async function POST(request: NextRequest) {
 
 // DELETE - Reset state
 export async function DELETE() {
-  await writeState({ ...defaultState, lastUpdated: Date.now() });
-  return NextResponse.json({ success: true });
+  const resetState = { ...defaultState, lastUpdated: Date.now() };
+  await writeState(resetState);
+  return NextResponse.json({ success: true, state: resetState });
 }
