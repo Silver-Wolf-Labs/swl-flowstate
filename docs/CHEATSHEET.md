@@ -55,8 +55,10 @@ Opens the dashboard with YouTube auto-connected.
 | `"start timer for 10 minutes"` | Custom duration (10 min) |
 | `"start pomo for 45 min"` | Custom duration (45 min) |
 | `"focus for 30 minutes"` | Custom duration (30 min) |
-| `"stop the timer"` | End current session |
-| `"pause my session"` | Stop focus session |
+| `"pause the timer"` | Pause, keep remaining time |
+| `"pause my session"` | Same as above |
+| `"stop the timer"` | Stop and reset timer |
+| `"stop my session"` | Same as above |
 
 ### Breaks
 
@@ -118,7 +120,8 @@ set_mood            - Change mood state
 suggest_mood        - AI mood recommendation
 get_mood_tips       - Productivity tips
 start_focus_session - Begin timer
-stop_focus_session  - End timer
+pause_focus_session - Pause timer (keeps time)
+stop_focus_session  - Stop and reset timer
 take_break          - Switch to break
 skip_break          - Skip break mode
 reset_timer_config  - Reset timer to defaults (25/5/15)

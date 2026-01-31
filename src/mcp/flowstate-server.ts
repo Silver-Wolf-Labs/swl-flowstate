@@ -358,8 +358,16 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: "pause_focus_session",
+        description: "Pause the current focus session, preserving the remaining time. Use this when you need a temporary break but want to continue later.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {},
+        },
+      },
+      {
         name: "stop_focus_session",
-        description: "Stop the current focus session. Use this when you need to pause or end your work session early.",
+        description: "Stop and reset the current focus session. Use this when you want to completely end the session and start fresh.",
         inputSchema: {
           type: "object" as const,
           properties: {},
@@ -496,7 +504,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       };
     }
 
-    case "stop_focus_session": {
+    case "pause_focus_session": {
       const wasRunning = sessionState.isRunning;
       const timeSpent = sessionState.totalTime - sessionState.timeRemaining;
       stopTimer();
@@ -505,8 +513,24 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           {
             type: "text" as const,
             text: wasRunning
-              ? `⏸️ Focus session paused.\n\nTime spent this session: ${formatTime(timeSpent)}\nSessions completed today: ${sessionState.sessionsCompleted}`
-              : "No active session to stop.",
+              ? `⏸️ Focus session paused.\n\nTime remaining: ${formatTime(sessionState.timeRemaining)}\nTime spent: ${formatTime(timeSpent)}\n\nSay "resume timer" or "start focusing" to continue.`
+              : "No active session to pause.",
+          },
+        ],
+      };
+    }
+
+    case "stop_focus_session": {
+      const wasRunning = sessionState.isRunning;
+      const timeSpent = sessionState.totalTime - sessionState.timeRemaining;
+      resetTimer();
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: wasRunning
+              ? `⏹️ Focus session stopped and reset.\n\nTime spent before stopping: ${formatTime(timeSpent)}\nSessions completed today: ${sessionState.sessionsCompleted}\n\nTimer reset to ${formatTime(DURATIONS.focus)}.`
+              : "No active session. Timer reset to defaults.",
           },
         ],
       };
