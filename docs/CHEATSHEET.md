@@ -72,6 +72,14 @@ Opens the dashboard with YouTube auto-connected.
 | `"timer status"` | Full timer info |
 | `"am I on a break?"` | Check current mode |
 
+### Settings
+
+| Command | Action |
+|---------|--------|
+| `"reset timer config"` | Reset to defaults (25/5/15 min) |
+| `"reset timer to defaults"` | Same as above |
+| `"restore default timer"` | Same as above |
+
 ---
 
 ## 📊 Stats & Insights
@@ -102,15 +110,16 @@ Opens the dashboard with YouTube auto-connected.
 For automation and scripting, these are the raw MCP tools:
 
 ```
-open_dashboard    - Launch web UI
-set_mood          - Change mood state  
-suggest_mood      - AI mood recommendation
-get_mood_tips     - Productivity tips
+open_dashboard      - Launch web UI
+set_mood            - Change mood state  
+suggest_mood        - AI mood recommendation
+get_mood_tips       - Productivity tips
 start_focus_session - Begin timer
 stop_focus_session  - End timer
-take_break        - Switch to break
-skip_break        - Skip break mode
-get_timer_status  - Timer info
+take_break          - Switch to break
+skip_break          - Skip break mode
+reset_timer_config  - Reset timer to defaults (25/5/15)
+get_timer_status    - Timer info
 get_productivity_stats - Analytics data
 ```
 
@@ -193,7 +202,8 @@ get_productivity_stats - Analytics data
 
 ## 🔗 Quick Links
 
-- **Dashboard**: http://localhost:3000
+- **Dashboard**: https://flowstate-swl.vercel.app
+- **Local Dev**: http://localhost:3000
 - **MCP Config**: `mcp-config.json`
 - **MCP Server**: `src/mcp/flowstate-server.ts`
 
