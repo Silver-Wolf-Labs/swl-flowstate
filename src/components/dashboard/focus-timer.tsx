@@ -175,19 +175,25 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
     setConfig(stored);
   }, []);
 
+  // Sync config changes to backend (only config, not timer state)
+  const prevSyncConfigRef = useRef(config);
   useEffect(() => {
     if (!updateSyncState) return;
-    const updates: Partial<FlowStateSync> = {
+    // Only sync when config actually changes
+    if (
+      config.focus === prevSyncConfigRef.current.focus &&
+      config.shortBreak === prevSyncConfigRef.current.shortBreak &&
+      config.longBreak === prevSyncConfigRef.current.longBreak
+    ) {
+      return;
+    }
+    prevSyncConfigRef.current = config;
+    updateSyncState({
       focusDuration: config.focus,
       shortBreakDuration: config.shortBreak,
       longBreakDuration: config.longBreak,
-    };
-    if (!isRunning) {
-      updates.timeRemaining = config[mode];
-      updates.totalTime = config[mode];
-    }
-    updateSyncState(updates);
-  }, [config, updateSyncState, isRunning, mode]);
+    });
+  }, [config, updateSyncState]);
 
   // Only reset timeLeft when config or mode changes (not on pause)
   const prevModeRef = useRef(mode);
@@ -210,10 +216,6 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
     const isMcpUpdate =
       syncState.lastMcpUpdate > 0 && syncState.lastMcpUpdate === syncState.lastUpdated;
     
-    // Skip sync if there was a recent local change (within 1 second) to avoid race conditions
-    const timeSinceLocalChange = Date.now() - lastLocalChangeRef.current;
-    const recentLocalChange = timeSinceLocalChange < 1000;
-
     if (
       typeof syncState.focusDuration === "number" ||
       typeof syncState.shortBreakDuration === "number" ||
@@ -228,12 +230,9 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
       persistConfig(nextConfig);
     }
 
-    // Only apply timer state from sync if:
-    // 1. It's an MCP update (always apply)
-    // 2. Timer is not running AND no recent local change
-    const shouldApplyTimerState = isMcpUpdate || (!isRunning && !recentLocalChange);
-
-    if (shouldApplyTimerState) {
+    // Only apply timer state from sync if it's an MCP update
+    // Local UI is the source of truth for user interactions
+    if (isMcpUpdate) {
       if (syncState.mode && syncState.mode !== mode) {
         setMode(syncState.mode);
       }
