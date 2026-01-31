@@ -239,11 +239,22 @@ UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
 
 ```
 flowstate/
+├── docs/
+│   ├── QUICK-START-GUIDE.md    # Quick start guide
+│   ├── MCP-SETUP.md            # MCP setup instructions
+│   ├── API.md                  # API reference
+│   ├── CHEATSHEET.md           # Command cheat sheet
+│   └── AGENT-WORKFLOW.md       # Agent workflow rules
+├── public/
+│   └── soundcloud-placeholder.svg
 ├── src/
 │   ├── app/                    # Next.js App Router
 │   │   ├── api/
+│   │   │   ├── auth/           # OAuth callbacks
+│   │   │   │   ├── soundcloud/ # SoundCloud callback
+│   │   │   │   └── spotify/    # Spotify callback
 │   │   │   ├── contact/        # Email API
-│   │   │   └── flowstate/      # MCP sync endpoint
+│   │   │   └── flowstate/      # Sync endpoint
 │   │   └── page.tsx            # Main dashboard
 │   ├── components/
 │   │   ├── dashboard/          # Feature components
