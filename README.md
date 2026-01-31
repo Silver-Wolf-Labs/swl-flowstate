@@ -213,10 +213,10 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### Documentation
 
-- Quick Start Guide: `docs/QUICK-START-GUIDE.md`
-- MCP Setup: `docs/MCP-SETUP.md`
-- API Reference: `docs/API.md`
-- Command Cheat Sheet: `docs/CHEATSHEET.md`
+- [Quick Start Guide](docs/QUICK-START-GUIDE.md)
+- [MCP Setup](docs/MCP-SETUP.md)
+- [API Reference](docs/API.md)
+- [Command Cheat Sheet](docs/CHEATSHEET.md)
 
 ### Environment Variables
 
