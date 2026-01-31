@@ -419,6 +419,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: "reset_timer_config",
+        description: "Reset the timer configuration to defaults (25 min focus, 5 min short break, 15 min long break). Use this to restore default settings on a device.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {},
+        },
+      },
+      {
         name: "suggest_mood",
         description: "Get an AI-powered mood suggestion based on time of day, day of week, and your productivity patterns. Use this to optimize your work environment.",
         inputSchema: {
@@ -609,6 +617,35 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           {
             type: "text" as const,
             text: "You're already in focus mode!",
+          },
+        ],
+      };
+    }
+
+    case "reset_timer_config": {
+      // Reset to defaults: 25 min focus, 5 min short break, 15 min long break
+      const defaultConfig = {
+        focusDuration: 25 * 60,
+        shortBreakDuration: 5 * 60,
+        longBreakDuration: 15 * 60,
+        timeRemaining: 25 * 60,
+        totalTime: 25 * 60,
+        isRunning: false,
+        mode: "focus" as const,
+      };
+      
+      sessionState.mode = "focus";
+      sessionState.totalTime = DURATIONS.focus;
+      sessionState.timeRemaining = DURATIONS.focus;
+      sessionState.isRunning = false;
+      
+      await syncWithWebApp(defaultConfig);
+      
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: "🔄 Timer configuration reset to defaults!\n\n• Focus: 25 minutes\n• Short Break: 5 minutes\n• Long Break: 15 minutes\n\nThe browser will update on the next sync (refresh the page or wait a few seconds).",
           },
         ],
       };
