@@ -198,6 +198,9 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
     if (!syncState || syncState.lastUpdated <= lastSyncRef.current) return;
     lastSyncRef.current = syncState.lastUpdated;
 
+    const isMcpUpdate =
+      syncState.lastMcpUpdate > 0 && syncState.lastMcpUpdate === syncState.lastUpdated;
+
     if (
       typeof syncState.focusDuration === "number" ||
       typeof syncState.shortBreakDuration === "number" ||
@@ -212,16 +215,20 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
       persistConfig(nextConfig);
     }
 
-    if (syncState.mode && syncState.mode !== mode) {
-      setMode(syncState.mode);
+    const shouldApplyTimerState = isMcpUpdate || !isRunning;
+
+    if (shouldApplyTimerState) {
+      if (syncState.mode && syncState.mode !== mode) {
+        setMode(syncState.mode);
+      }
+      if (typeof syncState.timeRemaining === "number") {
+        setTimeLeft(syncState.timeRemaining);
+      }
+      if (typeof syncState.isRunning === "boolean") {
+        setIsRunning(syncState.isRunning);
+      }
     }
-    if (typeof syncState.timeRemaining === "number") {
-      setTimeLeft(syncState.timeRemaining);
-    }
-    if (typeof syncState.isRunning === "boolean") {
-      setIsRunning(syncState.isRunning);
-    }
-  }, [syncState, config, mode]);
+  }, [syncState, config, mode, isRunning]);
 
   const totalTime = config[mode] || defaultConfig[mode];
   const progress = ((totalTime - timeLeft) / totalTime) * 100;
