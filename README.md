@@ -213,10 +213,8 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### Documentation
 
-- [Quick Start Guide](docs/QUICK-START-GUIDE.md)
-- [MCP Setup](docs/MCP-SETUP.md)
-- [API Reference](docs/API.md)
-- [Command Cheat Sheet](docs/CHEATSHEET.md)
+- [User Guide](docs/USER-GUIDE.md) - Commands, workflows, and quick reference
+- [Developer Guide](docs/DEVELOPER-GUIDE.md) - MCP setup, API reference, and integration
 
 ### Environment Variables
 
@@ -240,11 +238,8 @@ UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
 ```
 flowstate/
 ├── docs/
-│   ├── QUICK-START-GUIDE.md    # Quick start guide
-│   ├── MCP-SETUP.md            # MCP setup instructions
-│   ├── API.md                  # API reference
-│   ├── CHEATSHEET.md           # Command cheat sheet
-│   └── AGENT-WORKFLOW.md       # Agent workflow rules
+│   ├── USER-GUIDE.md           # Commands, workflows, quick reference
+│   └── DEVELOPER-GUIDE.md      # MCP setup, API, integration guide
 ├── public/
 │   └── soundcloud-placeholder.svg
 ├── src/
@@ -268,8 +263,7 @@ flowstate/
 │   │   └── music/              # Service integrations
 │   └── mcp/
 │       ├── flowstate-server.ts # MCP server
-│       ├── run-server.sh       # Server launcher
-│       └── README.md           # MCP documentation
+│       └── run-server.sh       # Server launcher
 └── mcp-config.json             # Cursor MCP config
 ```
 

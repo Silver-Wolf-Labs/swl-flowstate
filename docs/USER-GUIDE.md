@@ -1,19 +1,55 @@
-# FlowState Cheat Sheet
+# FlowState User Guide
 
-> Quick reference for controlling FlowState from your IDE
+> Complete reference for controlling FlowState from your IDE or web dashboard
 
 ---
 
-## 🚀 Getting Started
+## ⚡ Quick Start (30 seconds)
 
+### 1. Start the server
+```bash
+npm run dev
+```
+
+### 2. Open in IDE
+Say to your AI assistant:
 ```
 "flowstate init"
 ```
-Opens the dashboard with YouTube auto-connected.
+
+### 3. Start working
+```
+"set mood to focus and start a session"
+```
+
+That's it. You're in flow. 🚀
 
 ---
 
-## 🎯 Mood Commands
+## 🎯 Common Workflows
+
+### Morning Startup
+```
+"flowstate init"
+"what mood should I be in?"
+"start a focus session"
+```
+
+### Quick Focus
+```
+"set mood to focus"
+"start focusing"
+```
+
+### End of Day Review
+```
+"how productive was I today?"
+"give me tips for tomorrow"
+```
+
+---
+
+## 🎨 Mood Commands
 
 ### Set Mood Directly
 
@@ -112,82 +148,6 @@ Opens the dashboard with YouTube auto-connected.
 
 ---
 
-## 🔧 MCP Tool Reference
-
-For automation and scripting, these are the raw MCP tools:
-
-```
-open_dashboard       - Launch web UI
-set_mood             - Change mood state  
-suggest_mood         - AI mood recommendation
-get_mood_tips        - Productivity tips
-start_focus_session  - Begin timer
-pause_focus_session  - Pause timer (keeps time)
-resume_focus_session - Resume paused timer
-stop_focus_session   - Stop and reset timer
-take_break           - Switch to break
-skip_break           - Skip break mode
-reset_timer_config   - Reset to defaults (25/5/15)
-get_timer_status     - Timer info
-get_productivity_stats - Analytics data
-```
-
-### Tool Parameters
-
-#### `open_dashboard`
-```json
-{
-  "mood": "focus|calm|energetic|creative",
-  "autoConnectYoutube": true
-}
-```
-
-#### `set_mood`
-```json
-{
-  "mood": "focus|calm|energetic|creative"
-}
-```
-
-#### `suggest_mood`
-```json
-{
-  "apply": true  // Auto-apply the suggestion
-}
-```
-
-#### `start_focus_session`
-```json
-{
-  "duration": 25  // Minutes (default: 25)
-}
-```
-
----
-
-## 💡 Pro Tips
-
-### Combine Commands
-```
-"open flowstate with energetic mood and start a focus session"
-```
-
-### Context-Aware Suggestions
-```
-"It's late and I'm tired but need to finish this feature"
-→ AI will suggest Calm mode with reasoning
-```
-
-### Quick Workflow
-```
-1. "flowstate init"           # Open dashboard
-2. "what mood should I be in" # Get AI suggestion  
-3. "start focusing"           # Begin session
-4. "how productive was I"     # Check stats after
-```
-
----
-
 ## 🎨 Mood Quick Reference
 
 | Mood | Color | Best For | Music Vibe |
@@ -209,15 +169,42 @@ get_productivity_stats - Analytics data
 
 ---
 
+## 💡 Pro Tips
+
+### Combine Commands
+```
+"open flowstate with energetic mood and start a focus session"
+```
+
+### Context-Aware Suggestions
+```
+"It's late and I'm tired but need to finish this feature"
+→ AI will suggest Calm mode with reasoning
+```
+
+### Quick Workflow
+```
+1. "flowstate init"           # Open dashboard
+2. "what mood should I be in" # Get AI suggestion
+3. "start focusing"           # Begin session
+4. "how productive was I"     # Check stats after
+```
+
+---
+
 ## 🔗 Quick Links
 
 - **Dashboard**: https://flowstate-swl.vercel.app
 - **Local Dev**: http://localhost:3000
-- **MCP Config**: `mcp-config.json`
-- **MCP Server**: `src/mcp/flowstate-server.ts`
+- **Developer Guide**: [DEVELOPER-GUIDE.md](./DEVELOPER-GUIDE.md)
+- **Main README**: [../README.md](../README.md)
 
 ---
 
 <p align="center">
   <strong>FlowState</strong> · Your productivity, your way
 </p>
+<p align="center">
+  Built with 🐺 by Silver Wolf Labs
+</p>
+
