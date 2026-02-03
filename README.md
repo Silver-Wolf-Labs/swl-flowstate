@@ -238,34 +238,79 @@ UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
 ```
 flowstate/
 ├── docs/
-│   ├── USER-GUIDE.md           # Commands, workflows, quick reference
-│   ├── DEVELOPER-GUIDE.md      # MCP setup, API, integration guide
-│   └── PROJECT-NOTES.md        # Internal project notes
+│   ├── USER-GUIDE.md              # Commands, workflows, quick reference
+│   ├── DEVELOPER-GUIDE.md         # MCP setup, API, integration guide
+│   └── PROJECT-NOTES.md           # Internal project notes
 ├── public/
-│   └── soundcloud-placeholder.svg
+│   ├── soundcloud-placeholder.svg
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
 ├── src/
-│   ├── app/                    # Next.js App Router
+│   ├── app/                       # Next.js App Router
 │   │   ├── api/
-│   │   │   ├── auth/           # OAuth callbacks
-│   │   │   │   ├── soundcloud/ # SoundCloud callback
-│   │   │   │   └── spotify/    # Spotify callback
-│   │   │   ├── contact/        # Email API
-│   │   │   └── flowstate/      # Sync endpoint
-│   │   └── page.tsx            # Main dashboard
+│   │   │   ├── auth/
+│   │   │   │   ├── soundcloud/    # SoundCloud OAuth callback
+│   │   │   │   └── spotify/       # Spotify OAuth callback
+│   │   │   ├── contact/
+│   │   │   │   └── route.ts       # Contact form API
+│   │   │   └── flowstate/
+│   │   │       └── route.ts       # MCP sync endpoint
+│   │   ├── favicon.ico
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx               # Main dashboard
 │   ├── components/
-│   │   ├── dashboard/          # Feature components
-│   │   └── ui/                 # Reusable UI
+│   │   ├── dashboard/
+│   │   │   ├── analytics-preview.tsx
+│   │   │   ├── features-section.tsx
+│   │   │   ├── focus-timer.tsx
+│   │   │   ├── footer.tsx
+│   │   │   ├── header.tsx
+│   │   │   ├── hero-section.tsx
+│   │   │   ├── index.ts
+│   │   │   ├── mood-selector.tsx
+│   │   │   └── music-recommendations.tsx
+│   │   └── ui/
+│   │       ├── animated-number.tsx
+│   │       ├── badge.tsx
+│   │       ├── button.tsx
+│   │       ├── card.tsx
+│   │       ├── demo-modal.tsx
+│   │       ├── demo-walkthrough-modal.tsx
+│   │       ├── index.ts
+│   │       ├── particles.tsx
+│   │       ├── pricing-modal.tsx
+│   │       └── progress-ring.tsx
 │   ├── hooks/
+│   │   ├── index.ts
 │   │   ├── use-analytics.ts
 │   │   ├── use-flowstate-sync.ts  # IDE sync hook
 │   │   └── use-music.ts
 │   ├── lib/
-│   │   ├── mood-detection.ts   # AI mood logic
-│   │   └── music/              # Service integrations
+│   │   ├── analytics.ts
+│   │   ├── mood-detection.ts      # AI mood logic
+│   │   ├── utils.ts
+│   │   └── music/
+│   │       ├── apple-music.ts
+│   │       ├── index.ts
+│   │       ├── soundcloud.ts
+│   │       ├── spotify.ts
+│   │       └── youtube.ts
 │   └── mcp/
-│       ├── flowstate-server.ts # MCP server
-│       └── run-server.sh       # Server launcher
-└── mcp-config.json             # Cursor MCP config
+│       ├── flowstate-server.ts    # MCP server
+│       ├── run-server.sh          # Server launcher
+│       └── README.md
+├── deploy.sh                      # Deployment script
+├── mcp-config.json                # Cursor MCP config
+├── package.json
+├── tsconfig.json
+├── next.config.ts
+├── eslint.config.mjs
+├── postcss.config.mjs
+└── LICENSE.md
 ```
 
 ---

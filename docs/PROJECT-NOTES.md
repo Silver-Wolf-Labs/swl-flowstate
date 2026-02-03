@@ -1,4 +1,4 @@
-# Project Notes - SW Personal
+# Project Notes - FlowState
 
 ## Origin Story
 
