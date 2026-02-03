@@ -239,7 +239,8 @@ UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
 flowstate/
 ├── docs/
 │   ├── USER-GUIDE.md           # Commands, workflows, quick reference
-│   └── DEVELOPER-GUIDE.md      # MCP setup, API, integration guide
+│   ├── DEVELOPER-GUIDE.md      # MCP setup, API, integration guide
+│   └── PROJECT-NOTES.md        # Internal project notes
 ├── public/
 │   └── soundcloud-placeholder.svg
 ├── src/
