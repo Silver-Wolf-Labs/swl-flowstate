@@ -486,6 +486,52 @@ case "my_custom_tool": {
 
 ---
 
+## 🔐 Environment Variables
+
+FlowState uses environment variables for API keys and service configuration.
+
+### Quick Setup
+
+1. Copy the template file:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. Fill in your API keys in `.env.local`
+
+### Required Variables
+
+| Variable | Purpose | Get it from |
+|----------|---------|-------------|
+| `RESEND_API_KEY` | Contact form emails | [resend.com](https://resend.com) |
+
+### Optional Variables (Music Services)
+
+| Variable | Purpose | Get it from |
+|----------|---------|-------------|
+| `NEXT_PUBLIC_SPOTIFY_CLIENT_ID` | Spotify integration | [developer.spotify.com](https://developer.spotify.com/dashboard) |
+| `SPOTIFY_CLIENT_SECRET` | Spotify OAuth | Same as above |
+| `NEXT_PUBLIC_APPLE_MUSIC_DEVELOPER_TOKEN` | Apple Music | [developer.apple.com](https://developer.apple.com/musickit/) |
+| `NEXT_PUBLIC_SOUNDCLOUD_CLIENT_ID` | SoundCloud | [soundcloud.com/you/apps](https://soundcloud.com/you/apps) |
+| `NEXT_PUBLIC_YOUTUBE_API_KEY` | YouTube API | [console.cloud.google.com](https://console.cloud.google.com/apis/credentials) |
+
+### Optional Variables (Analytics)
+
+| Variable | Purpose | Get it from |
+|----------|---------|-------------|
+| `UPSTASH_REDIS_REST_URL` | Persistent analytics | [upstash.com](https://upstash.com) |
+| `UPSTASH_REDIS_REST_TOKEN` | Redis auth | Same as above |
+
+### App Configuration
+
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| `NEXT_PUBLIC_APP_URL` | OAuth redirect URL | `http://localhost:3000` |
+
+> 💡 **Tip**: YouTube works with curated streams even without an API key. The other music services are optional.
+
+---
+
 <p align="center">
   Need help? Open an issue on GitHub.
 </p>
