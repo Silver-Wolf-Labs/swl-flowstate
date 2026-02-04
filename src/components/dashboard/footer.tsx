@@ -1,12 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Github, Twitter, Linkedin, Heart, Waves } from "lucide-react";
-import Link from "next/link";
+import { Github, Linkedin, Heart, Waves } from "lucide-react";
 
 const socialLinks = [
   { icon: Github, href: "https://github.com/Silver-Wolf-Labs/swl-flowstate", label: "GitHub" },
-  { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
   { icon: Linkedin, href: "https://www.linkedin.com/in/fabriziomendez/", label: "LinkedIn" },
 ];
 
@@ -24,28 +22,24 @@ const footerLinks: FooterColumn[] = [
   {
     title: "Product",
     links: [
-      { label: "Features", href: "/#features" },
-      { label: "Pricing", href: "/#pricing" },
-      { label: "Dashboard", href: "/#dashboard" },
+      { label: "Mood Selector", href: "/#mood-selector" },
+      { label: "Focus Timer", href: "/#focus" },
+      { label: "Music", href: "/#music" },
       { label: "Analytics", href: "/#analytics" },
     ],
   },
   {
     title: "Resources",
     links: [
-      { label: "Documentation", href: "#" },
-      { label: "API", href: "#" },
-      { label: "Blog", href: "#" },
-      { label: "Community", href: "#" },
+      { label: "GitHub", href: "https://github.com/Silver-Wolf-Labs/swl-flowstate" },
+      { label: "Report Issue", href: "https://github.com/Silver-Wolf-Labs/swl-flowstate/issues" },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "About", href: "#" },
-      { label: "Careers", href: "#" },
+      { label: "Silver Wolf Labs", href: "https://github.com/Silver-Wolf-Labs" },
       { label: "Contact", href: "mailto:fabriziomendezalberti@gmail.com" },
-      { label: "Press", href: "#" },
     ],
   },
   {
