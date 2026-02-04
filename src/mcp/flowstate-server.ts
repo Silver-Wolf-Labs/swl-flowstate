@@ -867,6 +867,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       const url = `${WEB_APP_URL}?${params.toString()}`;
 
+      // Send IDE connect event to track connection
+      await sendIDEConnect();
+
       // Sync state to web app (no scrollTo)
       await syncWithWebApp({
         currentMood: sessionState.currentMood,
