@@ -94,7 +94,7 @@ export const curatedLofiStreams = {
     },
     {
       id: "HuFYqnbVbzY", // Calm livestream
-      title: "Calm & Relaxing Live Stream",
+      title: "Jazz lofi radio 🎷 beats to chill/study to",
       channelTitle: "Calm Music",
       isLive: true,
     },
