@@ -91,6 +91,20 @@ async function sendIDEConnect() {
   }
 }
 
+// Send IDE disconnect event
+async function sendIDEDisconnect() {
+  try {
+    const ide = detectIDE();
+    await fetch(`${WEB_APP_URL}/api/ide-connection`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "disconnect", ide }),
+    });
+  } catch (error) {
+    console.error("IDE disconnect failed:", error);
+  }
+}
+
 // Sync state with web app
 async function syncWithWebApp(updates: Record<string, unknown>, scrollTo?: string) {
   try {
@@ -556,6 +570,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
         },
       },
+      {
+        name: "disconnect_ide",
+        description: "Disconnect from the FlowState dashboard and stop IDE tracking. Use 'flowstate disconnect' to trigger this.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {},
+        },
+      },
     ],
   };
 });
@@ -916,6 +938,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           {
             type: "text" as const,
             text: `🚀 Opening FlowState Dashboard!\n\n${mood ? `${moodEmojis[mood]} Mood: ${mood}\n` : ""}${autoConnectYoutube ? "🎵 Auto-connecting to YouTube...\n" : ""}\n📍 URL: ${url}`,
+          },
+        ],
+      };
+    }
+
+    case "disconnect_ide": {
+      // Send disconnect event to the API
+      await sendIDEDisconnect();
+
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: `👋 Disconnected from FlowState!\n\nIDE tracking has been stopped. Your session data has been saved.\n\nRun 'flowstate init' to reconnect.`,
           },
         ],
       };
