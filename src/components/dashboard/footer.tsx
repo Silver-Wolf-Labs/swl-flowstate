@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Github, Twitter, Linkedin, Heart, Waves } from "lucide-react";
+import Link from "next/link";
 
 const socialLinks = [
   { icon: Github, href: "https://github.com/Silver-Wolf-Labs/swl-flowstate", label: "GitHub" },
