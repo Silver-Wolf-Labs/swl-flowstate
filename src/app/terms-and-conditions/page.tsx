@@ -123,63 +123,51 @@ export default function TermsPage() {
             </div>
 
             <section>
-              <h3 className="text-xl font-semibold mb-4">30-Day Money-Back Guarantee</h3>
+              <h3 className="text-xl font-semibold mb-4">Merchant of Record</h3>
               <p className="text-muted-foreground leading-relaxed">
-                We want you to be completely satisfied with FlowState. If you&apos;re not happy with your purchase, we offer a full refund within 30 days of your initial subscription purchase—no questions asked.
+                All payments for FlowState are processed by Paddle.com, who acts as our Merchant of Record. This means you purchase FlowState from Paddle, and all refund requests are handled according to Paddle&apos;s refund policy.
               </p>
             </section>
 
             <section>
-              <h3 className="text-xl font-semibold mb-4">Eligibility for Refunds</h3>
-              <p className="text-muted-foreground leading-relaxed mb-4">You are eligible for a full refund if:</p>
-              <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                <li>You request a refund within 30 days of your initial purchase</li>
-                <li>This is your first refund request for FlowState</li>
-                <li>You have not violated our Terms of Service</li>
-              </ul>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-semibold mb-4">How to Request a Refund</h3>
-              <p className="text-muted-foreground leading-relaxed mb-4">To request a refund:</p>
-              <ol className="list-decimal list-inside text-muted-foreground space-y-2">
-                <li>Email us at <a href="mailto:fabriziomendezalberti@gmail.com" className="text-primary hover:underline">fabriziomendezalberti@gmail.com</a></li>
-                <li>Include your account email and order/transaction ID</li>
-                <li>Briefly explain why you&apos;re requesting a refund (optional but helpful)</li>
-              </ol>
-              <p className="text-muted-foreground leading-relaxed mt-4">
-                We typically process refund requests within 3-5 business days. Once approved, the refund will be credited to your original payment method within 5-10 business days, depending on your bank.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-semibold mb-4">Subscription Cancellations</h3>
+              <h3 className="text-xl font-semibold mb-4">Consumer Right to Cancel</h3>
               <p className="text-muted-foreground leading-relaxed mb-4">
-                You can cancel your subscription at any time. When you cancel:
+                If you are a Consumer, you have the right to cancel your purchase and receive a full refund within 14 days without giving any reason. The cancellation period expires 14 days from the day after completion of the transaction.
               </p>
-              <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                <li>You will retain access until the end of your current billing period</li>
-                <li>No further charges will be made</li>
-                <li>Your data will be retained for 30 days after cancellation</li>
-              </ul>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-semibold mb-4">Annual Subscriptions</h3>
               <p className="text-muted-foreground leading-relaxed">
-                For annual subscriptions, the 30-day money-back guarantee applies from the date of purchase. After 30 days, you may cancel at any time but will not receive a prorated refund for the remaining months.
+                <strong>Important:</strong> Your right to cancel does not apply once you have started to download, stream, or otherwise acquire the digital content. By downloading or accessing FlowState, you consent to immediate performance and acknowledge that you lose your right of withdrawal.
               </p>
             </section>
 
             <section>
-              <h3 className="text-xl font-semibold mb-4">Exceptions</h3>
-              <p className="text-muted-foreground leading-relaxed mb-4">Refunds may not be granted if:</p>
+              <h3 className="text-xl font-semibold mb-4">How to Request a Refund or Cancellation</h3>
+              <p className="text-muted-foreground leading-relaxed mb-4">
+                To request a refund or cancel your purchase, please contact Paddle directly through their support channels at{" "}
+                <a href="https://paddle.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">paddle.com</a>.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                Paddle will reimburse all payments using the same payment method you used for the initial transaction, without undue delay and no later than 14 days after being informed of your decision to cancel.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-xl font-semibold mb-4">Subscriptions</h3>
+              <p className="text-muted-foreground leading-relaxed mb-4">
+                Paid subscriptions automatically renew until cancelled. To cancel your subscription:
+              </p>
               <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                <li>The request is made after 30 days from purchase</li>
-                <li>You have previously received a refund for FlowState</li>
-                <li>Your account was terminated for Terms of Service violations</li>
-                <li>There is evidence of fraud or abuse</li>
+                <li>Contact Paddle at least 48 hours before the end of your current billing period</li>
+                <li>Provide your order number and the email address used to purchase</li>
+                <li>Your cancellation will take effect at the next payment date</li>
+                <li>There are no refunds on unused subscription periods</li>
               </ul>
+            </section>
+
+            <section>
+              <h3 className="text-xl font-semibold mb-4">Refund Policy</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Refunds are provided at the sole discretion of Paddle on a case-by-case basis. This does not affect your statutory rights as a Consumer in relation to products which are not as described, faulty, or not fit for purpose.
+              </p>
             </section>
 
             {/* Contact Section */}
