@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Monitor, Check, ChevronRight, ChevronLeft, RefreshCw, Loader2 } from "lucide-react";
+import { Monitor, Check, ChevronRight, ChevronLeft, RefreshCw, Loader2, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DetectedIDE, IDEType, IDE_INFO } from "../types";
 import { useState, useEffect } from "react";
@@ -26,6 +26,17 @@ export function IDEDetectionStep({
   const [isDetecting, setIsDetecting] = useState(false);
   const [hasDetected, setHasDetected] = useState(false);
 
+  // Create a list of all IDEs (use detected ones or fallback to all IDEs)
+  const allIDEs: DetectedIDE[] = detectedIDEs.length > 0
+    ? detectedIDEs
+    : (Object.keys(IDE_INFO) as IDEType[]).map(id => ({
+        id,
+        name: IDE_INFO[id].name,
+        detected: false,
+        configPath: '',
+        icon: IDE_INFO[id].icon,
+      }));
+
   useEffect(() => {
     // Auto-detect on mount if not already detected
     if (!hasDetected && detectedIDEs.length === 0) {
@@ -43,7 +54,7 @@ export function IDEDetectionStep({
     }
   };
 
-  const detectedCount = detectedIDEs.filter(ide => ide.detected).length;
+  const detectedCount = allIDEs.filter(ide => ide.detected).length;
   const hasSelection = selectedIDEs.length > 0;
 
   return (
@@ -63,6 +74,18 @@ export function IDEDetectionStep({
         </p>
       </motion.div>
 
+      {/* Info notice about web-based detection */}
+      <motion.div
+        className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-start gap-2"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
+        <Info className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+        <p className="text-xs text-muted-foreground">
+          Select the IDEs you have installed. Auto-detection may not work in web browsers - simply select your IDEs manually.
+        </p>
+      </motion.div>
+
       {/* Detection status */}
       {isDetecting ? (
         <motion.div
@@ -77,21 +100,18 @@ export function IDEDetectionStep({
         <>
           {/* IDE list */}
           <div className="space-y-3">
-            {detectedIDEs.map((ide, index) => (
+            {allIDEs.map((ide, index) => (
               <motion.button
                 key={ide.id}
                 onClick={() => onSelect(ide.id)}
                 className={`w-full p-4 rounded-xl border transition-all text-left ${
                   selectedIDEs.includes(ide.id)
                     ? "bg-primary/10 border-primary"
-                    : ide.detected
-                    ? "bg-secondary/50 border-border hover:border-primary/50"
-                    : "bg-secondary/20 border-border/50 opacity-60"
+                    : "bg-secondary/50 border-border hover:border-primary/50"
                 }`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
-                disabled={!ide.detected}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -99,7 +119,7 @@ export function IDEDetectionStep({
                     <div>
                       <div className="font-medium">{IDE_INFO[ide.id].name}</div>
                       <div className="text-xs text-muted-foreground">
-                        {ide.detected ? "Detected on your system" : "Not detected"}
+                        {ide.detected ? "Auto-detected" : "Click to select"}
                       </div>
                     </div>
                   </div>

@@ -332,6 +332,7 @@ export default function Home() {
       <DemoWalkthroughModal
         isOpen={showDemoWalkthrough}
         onClose={() => setShowDemoWalkthrough(false)}
+        onGetStarted={() => setShowPricingModal(true)}
       />
 
       {/* Footer */}
