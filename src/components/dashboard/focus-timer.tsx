@@ -340,7 +340,7 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
       }
       sessionStartRef.current = null;
 
-      // Auto switch modes
+      // Auto switch modes and auto-start break timer
       if (mode === "focus") {
         const nextSessions = sessions + 1;
         setSessions(nextSessions);
@@ -348,8 +348,11 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
         const nextTime = config[nextMode];
         setMode(nextMode);
         setTimeLeft(nextTime);
+        // Auto-start the break timer
+        setIsRunning(true);
+        sessionStartRef.current = Date.now();
         updateSyncState?.({
-          isRunning: false,
+          isRunning: true,
           mode: nextMode,
           timeRemaining: nextTime,
           totalTime: nextTime,
@@ -358,6 +361,7 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
         const nextTime = config.focus;
         setMode("focus");
         setTimeLeft(nextTime);
+        // Don't auto-start focus - let user decide when to start
         updateSyncState?.({
           isRunning: false,
           mode: "focus",

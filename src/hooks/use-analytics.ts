@@ -3,6 +3,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { analyticsService, type DailyStats, type FocusSession } from "@/lib/analytics";
 
+// Custom event name for analytics updates
+const ANALYTICS_UPDATE_EVENT = "flowstate-analytics-update";
+
+// Dispatch custom event to notify all useAnalytics instances
+function dispatchAnalyticsUpdate() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(ANALYTICS_UPDATE_EVENT));
+  }
+}
+
 export function useAnalytics() {
   const [todayStats, setTodayStats] = useState<DailyStats | null>(null);
   const [currentStreak, setCurrentStreak] = useState(0);
@@ -26,8 +36,19 @@ export function useAnalytics() {
     setPeakHours(analyticsService.getPeakHours());
   }, []);
 
+  // Load initial data and listen for updates from other components
   useEffect(() => {
     refreshData();
+
+    // Listen for analytics updates from other components
+    const handleAnalyticsUpdate = () => {
+      refreshData();
+    };
+
+    window.addEventListener(ANALYTICS_UPDATE_EVENT, handleAnalyticsUpdate);
+    return () => {
+      window.removeEventListener(ANALYTICS_UPDATE_EVENT, handleAnalyticsUpdate);
+    };
   }, [refreshData]);
 
   // Record a focus session
@@ -37,6 +58,8 @@ export function useAnalytics() {
       analyticsService.recordSession(session);
       console.log("[useAnalytics] After recordSession - localStorage data:", analyticsService.getData());
       refreshData();
+      // Notify other components about the update
+      dispatchAnalyticsUpdate();
     },
     [refreshData]
   );

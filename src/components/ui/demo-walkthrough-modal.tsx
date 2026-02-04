@@ -255,6 +255,10 @@ export function DemoWalkthroughModal({ isOpen, onClose, onGetStarted }: DemoWalk
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(0);
   const [hoveredMood, setHoveredMood] = useState<string | null>(null);
+  // State for mobile-friendly click interactions
+  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [selectedIDE, setSelectedIDE] = useState<string | null>(null);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -262,6 +266,9 @@ export function DemoWalkthroughModal({ isOpen, onClose, onGetStarted }: DemoWalk
       document.body.style.overflow = "hidden";
       setCurrentStep(0);
       setHoveredMood(null);
+      setSelectedMood(null);
+      setSelectedService(null);
+      setSelectedIDE(null);
     } else {
       document.body.style.overflow = "";
     }
@@ -292,9 +299,10 @@ export function DemoWalkthroughModal({ isOpen, onClose, onGetStarted }: DemoWalk
   const step = demoSteps[currentStep];
   const Icon = step.icon;
 
-  // Get current gradient based on hovered mood (Step 1 only)
-  const currentGradient = currentStep === 0 && hoveredMood
-    ? moodColors[hoveredMood as keyof typeof moodColors]?.gradient || step.color
+  // Get current gradient based on hovered or selected mood (Step 1 only)
+  const activeMood = hoveredMood || selectedMood;
+  const currentGradient = currentStep === 0 && activeMood
+    ? moodColors[activeMood as keyof typeof moodColors]?.gradient || step.color
     : step.color;
 
   const slideVariants = {
@@ -439,18 +447,25 @@ export function DemoWalkthroughModal({ isOpen, onClose, onGetStarted }: DemoWalk
                         {step.features.map((feature, index) => {
                           const moodConfig = moodColors[feature as keyof typeof moodColors];
                           const MoodIcon = feature === "Deep Focus" ? Brain : feature === "Creative" ? Palette : feature === "Calm" ? Coffee : Zap;
+                          const isActive = hoveredMood === feature || selectedMood === feature;
                           return (
                             <motion.div
                               key={feature}
                               className={`px-4 py-3 rounded-xl text-sm font-medium bg-gradient-to-r ${moodConfig?.gradient || step.color} text-white cursor-pointer flex items-center gap-2`}
                               initial={{ opacity: 0, scale: 0 }}
-                              animate={{ opacity: 1, scale: 1 }}
+                              animate={{
+                                opacity: 1,
+                                scale: isActive ? 1.1 : 1,
+                                y: isActive ? -4 : 0
+                              }}
                               transition={{ delay: 0.35 + index * 0.08 }}
                               whileHover={{ scale: 1.1, y: -4 }}
+                              whileTap={{ scale: 0.95 }}
                               onHoverStart={() => setHoveredMood(feature)}
                               onHoverEnd={() => setHoveredMood(null)}
+                              onClick={() => setSelectedMood(selectedMood === feature ? null : feature)}
                               style={{
-                                boxShadow: hoveredMood === feature ? `0 8px 30px ${moodConfig?.hex}60` : "none"
+                                boxShadow: isActive ? `0 8px 30px ${moodConfig?.hex}60` : "none"
                               }}
                             >
                               <MoodIcon className="w-4 h-4" />
@@ -482,12 +497,18 @@ export function DemoWalkthroughModal({ isOpen, onClose, onGetStarted }: DemoWalk
                       >
                         {musicServices.map((service, index) => {
                           const ServiceIcon = service.Icon;
+                          const isActive = selectedService === service.name;
                           return (
                             <motion.div
                               key={service.name}
-                              className="px-4 py-3 rounded-xl bg-secondary/80 border border-border flex items-center gap-2 cursor-pointer"
+                              className="px-4 py-3 rounded-xl bg-secondary/80 border flex items-center gap-2 cursor-pointer"
                               initial={{ opacity: 0, scale: 0 }}
-                              animate={{ opacity: 1, scale: 1 }}
+                              animate={{
+                                opacity: 1,
+                                scale: isActive ? 1.08 : 1,
+                                y: isActive ? -3 : 0,
+                                borderColor: isActive ? service.color : "var(--border)"
+                              }}
                               transition={{ delay: 0.35 + index * 0.08 }}
                               whileHover={{
                                 scale: 1.08,
@@ -495,7 +516,12 @@ export function DemoWalkthroughModal({ isOpen, onClose, onGetStarted }: DemoWalk
                                 boxShadow: `0 8px 25px ${service.color}40`,
                                 borderColor: service.color
                               }}
-                              style={{ color: service.color }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => setSelectedService(selectedService === service.name ? null : service.name)}
+                              style={{
+                                color: service.color,
+                                boxShadow: isActive ? `0 8px 25px ${service.color}40` : "none"
+                              }}
                             >
                               <ServiceIcon />
                               <span className="text-sm font-medium text-foreground">{service.name}</span>
@@ -513,23 +539,36 @@ export function DemoWalkthroughModal({ isOpen, onClose, onGetStarted }: DemoWalk
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
                       >
-                        {step.features.map((feature, index) => (
-                          <motion.div
-                            key={feature}
-                            className="px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-green-500/20 border border-emerald-500/30 flex items-center gap-2"
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.35 + index * 0.1 }}
-                            whileHover={{ scale: 1.05, borderColor: "#10b981" }}
-                          >
+                        {step.features.map((feature, index) => {
+                          const isActive = selectedIDE === feature;
+                          return (
                             <motion.div
-                              className="w-2 h-2 rounded-full bg-emerald-400"
-                              animate={{ opacity: [1, 0.4, 1] }}
-                              transition={{ duration: 1.5, repeat: Infinity, delay: index * 0.2 }}
-                            />
-                            <span className="text-sm font-medium">{feature}</span>
-                          </motion.div>
-                        ))}
+                              key={feature}
+                              className="px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-green-500/20 border flex items-center gap-2 cursor-pointer"
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{
+                                opacity: 1,
+                                x: 0,
+                                scale: isActive ? 1.05 : 1,
+                                borderColor: isActive ? "#10b981" : "rgba(16, 185, 129, 0.3)"
+                              }}
+                              transition={{ delay: 0.35 + index * 0.1 }}
+                              whileHover={{ scale: 1.05, borderColor: "#10b981" }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => setSelectedIDE(selectedIDE === feature ? null : feature)}
+                            >
+                              <motion.div
+                                className="w-2 h-2 rounded-full bg-emerald-400"
+                                animate={{
+                                  opacity: isActive ? 1 : [1, 0.4, 1],
+                                  scale: isActive ? [1, 1.3, 1] : 1
+                                }}
+                                transition={{ duration: isActive ? 0.5 : 1.5, repeat: Infinity, delay: index * 0.2 }}
+                              />
+                              <span className="text-sm font-medium">{feature}</span>
+                            </motion.div>
+                          );
+                        })}
                       </motion.div>
                     )}
 

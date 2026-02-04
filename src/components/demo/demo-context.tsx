@@ -50,6 +50,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       },
       onDestroyed: () => {
         setDriverInstance(null);
+        // Scroll to top of page after tour ends
+        window.scrollTo({ top: 0, behavior: "smooth" });
       },
     });
 
