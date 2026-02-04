@@ -57,7 +57,9 @@ function detectIDE(): "cursor" | "vscode" | "windsurf" | "intellij" | "unknown" 
   if (process.env.IDEA_INITIAL_DIRECTORY || process.env.JETBRAINS_IDE) {
     return "intellij";
   }
-  return "unknown";
+  // Default to cursor since this MCP server is primarily used with Cursor
+  // If other IDEs are detected, they would have matched above
+  return "cursor";
 }
 
 // Send IDE connection heartbeat
