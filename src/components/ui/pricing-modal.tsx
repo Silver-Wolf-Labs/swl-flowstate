@@ -1,30 +1,39 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check, CreditCard } from "lucide-react";
-import { useEffect } from "react";
+import { X, Check, CreditCard, Settings } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "./button";
+import { SetupWizardModal } from "@/components/setup";
 
 interface PricingModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const plans = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "forever",
-    description: "Perfect for getting started",
-    features: [
-      "Focus timer with sessions",
-      "4 mood presets",
-      "YouTube lofi integration",
-      "Basic analytics",
-    ],
-    cta: "Current Plan",
-    disabled: true,
-  },
+interface SetupStatus {
+  isComplete: boolean;
+  completedAt: string | null;
+  selectedIDEs: string[];
+}
+
+const getFreePlan = (isSetupComplete: boolean) => ({
+  name: "Free",
+  price: "$0",
+  period: "forever",
+  description: "Perfect for getting started",
+  features: [
+    "Focus timer with sessions",
+    "4 mood presets",
+    "YouTube lofi integration",
+    "Basic analytics",
+  ],
+  cta: isSetupComplete ? "Current Plan" : "Set me up",
+  disabled: isSetupComplete,
+  isSetupTrigger: !isSetupComplete,
+  popular: false,
+});
+const paidPlans = [
   {
     name: "Pro",
     price: "$9",
@@ -61,6 +70,30 @@ const plans = [
 ];
 
 export function PricingModal({ isOpen, onClose }: PricingModalProps) {
+  const [showSetupWizard, setShowSetupWizard] = useState(false);
+  const [setupStatus, setSetupStatus] = useState<SetupStatus>({
+    isComplete: false,
+    completedAt: null,
+    selectedIDEs: [],
+  });
+
+  // Check setup status on mount
+  useEffect(() => {
+    if (isOpen) {
+      checkSetupStatus();
+    }
+  }, [isOpen]);
+
+  const checkSetupStatus = async () => {
+    try {
+      const response = await fetch("/api/setup/complete");
+      const data = await response.json();
+      setSetupStatus(data);
+    } catch (error) {
+      console.error("Failed to check setup status:", error);
+    }
+  };
+
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -73,9 +106,18 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
     };
   }, [isOpen]);
 
-  const handlePurchase = async (planName: string) => {
-    if (planName === "Pro" || planName === "Team") {
-      // Send pricing inquiry via API
+  const freePlan = getFreePlan(setupStatus.isComplete);
+  const plans = [freePlan, ...paidPlans];
+
+  const handlePlanClick = async (plan: typeof plans[0]) => {
+    // Handle Free plan setup trigger
+    if (plan.name === "Free" && !setupStatus.isComplete) {
+      setShowSetupWizard(true);
+      return;
+    }
+
+    // Handle paid plans
+    if (plan.name === "Pro" || plan.name === "Team") {
       try {
         const response = await fetch("/api/contact", {
           method: "POST",
@@ -83,24 +125,27 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
           body: JSON.stringify({
             name: "Pricing Inquiry",
             email: "user@flowstate.app",
-            message: `User is interested in the ${planName} plan. Please follow up.`,
+            message: `User is interested in the ${plan.name} plan. Please follow up.`,
             type: "pricing",
           }),
         });
-        
+
         if (response.ok) {
-          // For now, redirect to mailto as a fallback UX
-          const subject = encodeURIComponent(`FlowState ${planName} Plan Interest`);
-          const body = encodeURIComponent(`Hi,\n\nI'm interested in the ${planName} plan for FlowState.\n\nPlease send me more information about pricing and features.\n\nThanks!`);
+          const subject = encodeURIComponent(`FlowState ${plan.name} Plan Interest`);
+          const body = encodeURIComponent(`Hi,\n\nI'm interested in the ${plan.name} plan for FlowState.\n\nPlease send me more information about pricing and features.\n\nThanks!`);
           window.open(`mailto:fabriziomendezalberti@gmail.com?subject=${subject}&body=${body}`, "_blank");
         }
       } catch {
-        // Fallback to mailto
-        const subject = encodeURIComponent(`FlowState ${planName} Plan Interest`);
-        const body = encodeURIComponent(`Hi,\n\nI'm interested in the ${planName} plan for FlowState.\n\nPlease send me more information about pricing and features.\n\nThanks!`);
+        const subject = encodeURIComponent(`FlowState ${plan.name} Plan Interest`);
+        const body = encodeURIComponent(`Hi,\n\nI'm interested in the ${plan.name} plan for FlowState.\n\nPlease send me more information about pricing and features.\n\nThanks!`);
         window.open(`mailto:fabriziomendezalberti@gmail.com?subject=${subject}&body=${body}`, "_blank");
       }
     }
+  };
+
+  const handleSetupComplete = () => {
+    setSetupStatus(prev => ({ ...prev, isComplete: true }));
+    setShowSetupWizard(false);
   };
 
   return (
@@ -183,11 +228,14 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
                       </ul>
 
                       <Button
-                        variant={plan.popular ? "gradient" : "outline"}
+                        variant={plan.popular ? "gradient" : plan.name === "Free" && !setupStatus.isComplete ? "default" : "outline"}
                         className="w-full"
                         disabled={plan.disabled}
-                        onClick={() => handlePurchase(plan.name)}
+                        onClick={() => handlePlanClick(plan)}
                       >
+                        {plan.name === "Free" && !setupStatus.isComplete && (
+                          <Settings className="w-4 h-4 mr-1.5" />
+                        )}
                         {plan.cta}
                       </Button>
                     </motion.div>
@@ -242,6 +290,13 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
           </motion.div>
         </>
       )}
+
+      {/* Setup Wizard Modal */}
+      <SetupWizardModal
+        isOpen={showSetupWizard}
+        onClose={() => setShowSetupWizard(false)}
+        onComplete={handleSetupComplete}
+      />
     </AnimatePresence>
   );
 }

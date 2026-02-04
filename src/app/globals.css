@@ -179,3 +179,62 @@ html {
   background: rgba(139, 92, 246, 0.3);
   color: var(--foreground);
 }
+
+/* Driver.js tour popover styling */
+.driver-popover.flowstate-tour-popover {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  color: var(--foreground);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.driver-popover.flowstate-tour-popover .driver-popover-title {
+  color: var(--foreground);
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+.driver-popover.flowstate-tour-popover .driver-popover-description {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.driver-popover.flowstate-tour-popover .driver-popover-progress-text {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.driver-popover.flowstate-tour-popover .driver-popover-prev-btn,
+.driver-popover.flowstate-tour-popover .driver-popover-next-btn {
+  background: var(--secondary);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.driver-popover.flowstate-tour-popover .driver-popover-prev-btn:hover,
+.driver-popover.flowstate-tour-popover .driver-popover-next-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.driver-popover.flowstate-tour-popover .driver-popover-close-btn {
+  color: var(--muted-foreground);
+}
+
+.driver-popover.flowstate-tour-popover .driver-popover-close-btn:hover {
+  color: var(--foreground);
+}
+
+.driver-popover.flowstate-tour-popover .driver-popover-arrow-side-left,
+.driver-popover.flowstate-tour-popover .driver-popover-arrow-side-right,
+.driver-popover.flowstate-tour-popover .driver-popover-arrow-side-top,
+.driver-popover.flowstate-tour-popover .driver-popover-arrow-side-bottom {
+  border-color: var(--card);
+}

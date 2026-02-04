@@ -15,6 +15,7 @@ import {
 import { Particles, RisingParticles, DemoModal, PricingModal, DemoWalkthroughModal } from "@/components/ui";
 import { useAnalytics } from "@/hooks";
 import { useFlowStateSync } from "@/hooks/use-flowstate-sync";
+import { useDemoContext } from "@/components/demo";
 
 export type MoodId = "focus" | "calm" | "energetic" | "creative";
 
@@ -38,6 +39,7 @@ export default function Home() {
   const [ideControlled, setIdeControlled] = useState(false); // Brief flash when IDE changes something
   const urlParamsProcessed = useRef(false);
   const { recordSession } = useAnalytics();
+  const { startTour, startSimulation } = useDemoContext();
 
   // Scroll to section helper
   const scrollToSection = useCallback((target: string) => {
@@ -211,6 +213,7 @@ export default function Home() {
             {/* Mood selector - full width */}
             <motion.div
               id="mood-selector"
+              data-tour="mood-selector"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -222,6 +225,7 @@ export default function Home() {
             {/* Music Recommendations - full width */}
             <motion.div
               id="music"
+              data-tour="music-player"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -233,6 +237,8 @@ export default function Home() {
 
             {/* Focus Timer - below music, centered */}
             <motion.div
+              id="focus"
+              data-tour="timer"
               className="max-w-xl mx-auto w-full"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -249,6 +255,8 @@ export default function Home() {
 
             {/* Analytics - full width */}
             <motion.div
+              id="analytics"
+              data-tour="stats"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -323,7 +331,12 @@ export default function Home() {
       {/* Modals */}
       <DemoModal isOpen={showDemoModal} onClose={() => setShowDemoModal(false)} />
       <PricingModal isOpen={showPricingModal} onClose={() => setShowPricingModal(false)} />
-      <DemoWalkthroughModal isOpen={showDemoWalkthrough} onClose={() => setShowDemoWalkthrough(false)} />
+      <DemoWalkthroughModal
+        isOpen={showDemoWalkthrough}
+        onClose={() => setShowDemoWalkthrough(false)}
+        onStartTour={startTour}
+        onStartSimulation={startSimulation}
+      />
 
       {/* Footer */}
       <Footer />
