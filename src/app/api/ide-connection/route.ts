@@ -28,6 +28,7 @@ export interface IDEConnectionState {
   sessionStartTime: number | null; // timestamp when current session started
   lastHeartbeat: number | null; // timestamp of last heartbeat
   currentSessionDuration: number; // seconds in current session
+  disconnectedByUser?: boolean; // true if user explicitly disconnected (prevents auto-reconnect from heartbeats)
 }
 
 export interface IDEConnectionHistory {
@@ -173,6 +174,7 @@ export async function POST(request: NextRequest) {
         sessionStartTime: now,
         lastHeartbeat: now,
         currentSessionDuration: 0,
+        disconnectedByUser: false, // Clear the flag on explicit connect
       };
       await writeConnectionState(newState);
 
@@ -188,14 +190,20 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === "heartbeat") {
+      // If user explicitly disconnected, ignore heartbeats until they reconnect with "connect" action
+      if (state.disconnectedByUser) {
+        return NextResponse.json({ success: false, ignored: true, reason: "User disconnected", state, history });
+      }
+
       if (!state.isConnected || !state.sessionStartTime) {
-        // Auto-connect if not connected
+        // Auto-connect if not connected (and not explicitly disconnected by user)
         const newState: IDEConnectionState = {
           isConnected: true,
           connectedIDE: ide || state.connectedIDE || "unknown",
           sessionStartTime: now,
           lastHeartbeat: now,
           currentSessionDuration: 0,
+          disconnectedByUser: false,
         };
         await writeConnectionState(newState);
         return NextResponse.json({ success: true, state: newState, history });
@@ -242,6 +250,7 @@ export async function POST(request: NextRequest) {
         sessionStartTime: null,
         lastHeartbeat: null,
         currentSessionDuration: 0,
+        disconnectedByUser: true, // Prevent auto-reconnect from heartbeats
       };
       await writeConnectionState(newState);
 
