@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { DemoProvider } from "@/components/demo";
-import { SimulationOverlay } from "@/components/demo";
 import { FloatingTourButton } from "@/components/ui";
 
 const geistSans = Geist({
@@ -39,7 +38,6 @@ export default function RootLayout({
       >
         <DemoProvider>
           {children}
-          <SimulationOverlay />
           <FloatingTourButton />
         </DemoProvider>
       </body>

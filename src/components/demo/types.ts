@@ -1,4 +1,4 @@
-export type DemoMode = "tour" | "simulation" | null;
+export type DemoMode = "tour" | null;
 
 export interface TourStep {
   element?: string;
@@ -13,21 +13,11 @@ export interface TourStep {
 export interface DemoState {
   mode: DemoMode;
   isActive: boolean;
-  currentStep: number;
-  simulatedMood: "focus" | "calm" | "energetic" | "creative";
-  simulatedTimerState: "idle" | "running" | "paused" | "break";
-  simulatedTimeRemaining: number;
-  simulatedSessionCount: number;
 }
 
 export const INITIAL_DEMO_STATE: DemoState = {
   mode: null,
   isActive: false,
-  currentStep: 0,
-  simulatedMood: "focus",
-  simulatedTimerState: "idle",
-  simulatedTimeRemaining: 25 * 60,
-  simulatedSessionCount: 0,
 };
 
 export const TOUR_STEPS: TourStep[] = [

@@ -1,14 +1,13 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, Brain, Music, BarChart3, Timer, Heart, Sparkles, Play } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Brain, Music, BarChart3, Timer, Heart, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "./button";
 
 interface DemoWalkthroughModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onStartSimulation?: () => void;
 }
 
 const demoSteps = [
@@ -54,7 +53,7 @@ const demoSteps = [
   },
 ];
 
-export function DemoWalkthroughModal({ isOpen, onClose, onStartSimulation }: DemoWalkthroughModalProps) {
+export function DemoWalkthroughModal({ isOpen, onClose }: DemoWalkthroughModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(0);
 
@@ -258,34 +257,19 @@ export function DemoWalkthroughModal({ isOpen, onClose, onStartSimulation }: Dem
                   </Button>
 
                   {currentStep === demoSteps.length - 1 ? (
-                    <div className="flex gap-2">
-                      {onStartSimulation && (
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            onClose();
-                            setTimeout(() => onStartSimulation(), 300);
-                          }}
-                          className="min-w-[100px]"
-                        >
-                          <Play className="w-4 h-4 mr-1" />
-                          Try It
-                        </Button>
-                      )}
-                      <Button
-                        variant="gradient"
-                        onClick={() => {
-                          onClose();
-                          setTimeout(() => {
-                            document.getElementById("focus")?.scrollIntoView({ behavior: "smooth" });
-                          }, 300);
-                        }}
-                        className="min-w-[120px]"
-                      >
-                        <Sparkles className="w-4 h-4 mr-1" />
-                        Get Started
-                      </Button>
-                    </div>
+                    <Button
+                      variant="gradient"
+                      onClick={() => {
+                        onClose();
+                        setTimeout(() => {
+                          document.getElementById("focus")?.scrollIntoView({ behavior: "smooth" });
+                        }, 300);
+                      }}
+                      className="min-w-[120px]"
+                    >
+                      <Sparkles className="w-4 h-4 mr-1" />
+                      Get Started
+                    </Button>
                   ) : (
                     <Button
                       variant="gradient"

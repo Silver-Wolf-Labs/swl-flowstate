@@ -15,7 +15,6 @@ import {
 import { Particles, RisingParticles, DemoModal, PricingModal, DemoWalkthroughModal } from "@/components/ui";
 import { useAnalytics } from "@/hooks";
 import { useFlowStateSync } from "@/hooks/use-flowstate-sync";
-import { useDemoContext } from "@/components/demo";
 
 export type MoodId = "focus" | "calm" | "energetic" | "creative";
 
@@ -39,7 +38,6 @@ export default function Home() {
   const [ideControlled, setIdeControlled] = useState(false); // Brief flash when IDE changes something
   const urlParamsProcessed = useRef(false);
   const { recordSession } = useAnalytics();
-  const { startSimulation } = useDemoContext();
 
   // Scroll to section helper
   const scrollToSection = useCallback((target: string) => {
@@ -334,7 +332,6 @@ export default function Home() {
       <DemoWalkthroughModal
         isOpen={showDemoWalkthrough}
         onClose={() => setShowDemoWalkthrough(false)}
-        onStartSimulation={startSimulation}
       />
 
       {/* Footer */}
