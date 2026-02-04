@@ -11,6 +11,7 @@ const socialLinks = [
 interface FooterLink {
   label: string;
   href: string;
+  external?: boolean;
 }
 
 interface FooterColumn {
@@ -31,14 +32,14 @@ const footerLinks: FooterColumn[] = [
   {
     title: "Resources",
     links: [
-      { label: "GitHub", href: "https://github.com/Silver-Wolf-Labs/swl-flowstate" },
-      { label: "Report Issue", href: "https://github.com/Silver-Wolf-Labs/swl-flowstate/issues" },
+      { label: "GitHub", href: "https://github.com/Silver-Wolf-Labs/swl-flowstate", external: true },
+      { label: "Report Issue", href: "https://github.com/Silver-Wolf-Labs/swl-flowstate/issues", external: true },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "Silver Wolf Labs", href: "https://github.com/Silver-Wolf-Labs" },
+      { label: "Silver Wolf Labs", href: "https://github.com/Silver-Wolf-Labs", external: true },
       { label: "Contact", href: "mailto:fabriziomendezalberti@gmail.com" },
     ],
   },
@@ -114,6 +115,7 @@ export function Footer() {
                       href={link.href}
                       className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                       whileHover={{ x: 4 }}
+                      {...(link.external && { target: "_blank", rel: "noopener noreferrer" })}
                     >
                       {link.label}
                     </motion.a>
