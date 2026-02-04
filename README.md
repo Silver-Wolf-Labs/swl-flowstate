@@ -67,6 +67,7 @@ Just talk to your AI assistant naturally:
 | What you say | What happens |
 |--------------|--------------|
 | `"flowstate init"` | Opens dashboard with YouTube connected |
+| `"flowstate disconnect"` | Disconnects IDE and stops tracking |
 | `"set my mood to focus"` | Switches to Deep Focus mode |
 | `"I need to concentrate"` | AI suggests and applies optimal mood |
 | `"what mood should I be in?"` | AI analyzes your patterns and suggests |
@@ -80,6 +81,7 @@ Just talk to your AI assistant naturally:
 | Tool | Description |
 |------|-------------|
 | `open_dashboard` | Launch FlowState in browser with auto-connect |
+| `disconnect_ide` | Disconnect from FlowState and stop IDE tracking |
 | `set_mood` | Change mood (focus, calm, energetic, creative) |
 | `suggest_mood` | AI analyzes and recommends optimal mood |
 | `get_mood_tips` | Get productivity tips for current mood |

@@ -163,6 +163,7 @@ npx tsx /path/to/flowstate-server.ts
 | Tool | Purpose | When to Use |
 |------|---------|-------------|
 | `open_dashboard` | Open web UI | User says "flowstate init", "open flowstate" |
+| `disconnect_ide` | Disconnect IDE and stop tracking | User says "flowstate disconnect" |
 | `get_productivity_stats` | Get analytics | User says "show my stats" |
 
 ### Break Tools
@@ -187,6 +188,11 @@ npx tsx /path/to/flowstate-server.ts
   "mood": "focus|calm|energetic|creative",  // Optional
   "autoConnectYoutube": true                 // Optional, default: true
 }
+```
+
+#### `disconnect_ide`
+```json
+{}  // No parameters required
 ```
 
 #### `set_mood`
@@ -228,6 +234,7 @@ npx tsx /path/to/flowstate-server.ts
 | User Says | Tool to Call |
 |-----------|--------------|
 | "flowstate init" | `open_dashboard` with `autoConnectYoutube: true` |
+| "flowstate disconnect" | `disconnect_ide` |
 | "start timer for X min" | `start_focus_session` with `duration: X` |
 | "start pomo" | `start_focus_session` |
 | "pause timer" | `pause_focus_session` |

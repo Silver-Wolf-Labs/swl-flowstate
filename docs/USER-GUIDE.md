@@ -142,6 +142,7 @@ That's it. You're in flow. 🚀
 | Command | Action |
 |---------|--------|
 | `"flowstate init"` | Open dashboard + YouTube |
+| `"flowstate disconnect"` | Disconnect IDE and stop tracking |
 | `"open flowstate"` | Open dashboard |
 | `"open flowstate with focus mood"` | Open + set mood |
 | `"launch the dashboard"` | Open in browser |
