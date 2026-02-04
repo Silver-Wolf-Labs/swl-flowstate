@@ -39,7 +39,7 @@ export default function Home() {
   const [ideControlled, setIdeControlled] = useState(false); // Brief flash when IDE changes something
   const urlParamsProcessed = useRef(false);
   const { recordSession } = useAnalytics();
-  const { startTour, startSimulation } = useDemoContext();
+  const { startSimulation } = useDemoContext();
 
   // Scroll to section helper
   const scrollToSection = useCallback((target: string) => {
@@ -334,7 +334,6 @@ export default function Home() {
       <DemoWalkthroughModal
         isOpen={showDemoWalkthrough}
         onClose={() => setShowDemoWalkthrough(false)}
-        onStartTour={startTour}
         onStartSimulation={startSimulation}
       />
 

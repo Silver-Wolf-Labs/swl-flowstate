@@ -7,3 +7,4 @@ export { Particles, ConstellationParticles, SparkleParticles, RisingParticles } 
 export { DemoModal } from "./demo-modal";
 export { PricingModal } from "./pricing-modal";
 export { DemoWalkthroughModal } from "./demo-walkthrough-modal";
+export { FloatingTourButton } from "./floating-tour-button";

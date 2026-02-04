@@ -1,14 +1,13 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, Brain, Music, BarChart3, Timer, Heart, Sparkles, Play, MousePointer } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Brain, Music, BarChart3, Timer, Heart, Sparkles, Play } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "./button";
 
 interface DemoWalkthroughModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onStartTour?: () => void;
   onStartSimulation?: () => void;
 }
 
@@ -55,7 +54,7 @@ const demoSteps = [
   },
 ];
 
-export function DemoWalkthroughModal({ isOpen, onClose, onStartTour, onStartSimulation }: DemoWalkthroughModalProps) {
+export function DemoWalkthroughModal({ isOpen, onClose, onStartSimulation }: DemoWalkthroughModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(0);
 
@@ -260,19 +259,6 @@ export function DemoWalkthroughModal({ isOpen, onClose, onStartTour, onStartSimu
 
                   {currentStep === demoSteps.length - 1 ? (
                     <div className="flex gap-2">
-                      {onStartTour && (
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            onClose();
-                            setTimeout(() => onStartTour(), 300);
-                          }}
-                          className="min-w-[100px]"
-                        >
-                          <MousePointer className="w-4 h-4 mr-1" />
-                          Tour
-                        </Button>
-                      )}
                       {onStartSimulation && (
                         <Button
                           variant="outline"
