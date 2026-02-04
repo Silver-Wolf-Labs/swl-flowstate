@@ -23,10 +23,10 @@ const footerLinks: FooterColumn[] = [
   {
     title: "Product",
     links: [
-      { label: "Features", href: "#features" },
-      { label: "Pricing", href: "#pricing" },
-      { label: "Dashboard", href: "#dashboard" },
-      { label: "Analytics", href: "#analytics" },
+      { label: "Features", href: "/#features" },
+      { label: "Pricing", href: "/#pricing" },
+      { label: "Dashboard", href: "/#dashboard" },
+      { label: "Analytics", href: "/#analytics" },
     ],
   },
   {
@@ -50,9 +50,8 @@ const footerLinks: FooterColumn[] = [
   {
     title: "Legal",
     links: [
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Terms of Service", href: "/terms" },
-      { label: "Refund Policy", href: "/refund" },
+      { label: "Privacy Policy", href: "/privacy-policy" },
+      { label: "Terms & Conditions", href: "/terms-and-conditions" },
     ],
   },
 ];
