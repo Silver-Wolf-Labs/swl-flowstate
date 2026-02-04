@@ -10,6 +10,7 @@ import {
   FocusTimer,
   MusicRecommendations,
   AnalyticsPreview,
+  IDEAnalytics,
   Footer,
 } from "@/components/dashboard";
 import { Particles, RisingParticles, DemoModal, PricingModal, DemoWalkthroughModal } from "@/components/ui";
@@ -261,6 +262,17 @@ export default function Home() {
               transition={{ delay: 0.3 }}
             >
               <AnalyticsPreview />
+            </motion.div>
+
+            {/* IDE Connection Analytics - full width */}
+            <motion.div
+              id="ide-analytics"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+            >
+              <IDEAnalytics />
             </motion.div>
           </div>
         </div>

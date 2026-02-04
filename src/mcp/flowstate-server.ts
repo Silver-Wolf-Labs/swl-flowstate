@@ -25,12 +25,63 @@ import {
 // Web app sync URL - defaults to production, set FLOWSTATE_WEB_URL=http://localhost:3000 for local dev
 const WEB_APP_URL = process.env.FLOWSTATE_WEB_URL || "https://flowstate-swl.vercel.app";
 
+// Detect which IDE is running based on environment
+function detectIDE(): "cursor" | "vscode" | "windsurf" | "intellij" | "unknown" {
+  // Check common environment variables set by IDEs
+  const termProgram = process.env.TERM_PROGRAM || "";
+  const vscodeIpcHook = process.env.VSCODE_IPC_HOOK || "";
+  const cursorIpcHook = process.env.CURSOR_IPC_HOOK || "";
+
+  if (cursorIpcHook || termProgram.toLowerCase().includes("cursor")) {
+    return "cursor";
+  }
+  if (vscodeIpcHook || termProgram.toLowerCase().includes("vscode")) {
+    return "vscode";
+  }
+  if (process.env.WINDSURF_IPC_HOOK || termProgram.toLowerCase().includes("windsurf")) {
+    return "windsurf";
+  }
+  if (process.env.IDEA_INITIAL_DIRECTORY || process.env.JETBRAINS_IDE) {
+    return "intellij";
+  }
+  return "unknown";
+}
+
+// Send IDE connection heartbeat
+async function sendIDEHeartbeat() {
+  try {
+    const ide = detectIDE();
+    await fetch(`${WEB_APP_URL}/api/ide-connection`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "heartbeat", ide }),
+    });
+  } catch (error) {
+    // Web app might not be running, that's okay
+    console.error("IDE heartbeat failed:", error);
+  }
+}
+
+// Send IDE connect event
+async function sendIDEConnect() {
+  try {
+    const ide = detectIDE();
+    await fetch(`${WEB_APP_URL}/api/ide-connection`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "connect", ide }),
+    });
+  } catch (error) {
+    console.error("IDE connect failed:", error);
+  }
+}
+
 // Sync state with web app
 async function syncWithWebApp(updates: Record<string, unknown>, scrollTo?: string) {
   try {
     // Always include source: "mcp" to identify updates from IDE
-    const payload = { 
-      ...updates, 
+    const payload = {
+      ...updates,
       source: "mcp",
       ...(scrollTo ? { scrollTo } : {}),
     };
@@ -39,6 +90,9 @@ async function syncWithWebApp(updates: Record<string, unknown>, scrollTo?: strin
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+
+    // Also send heartbeat on every sync
+    await sendIDEHeartbeat();
   } catch (error) {
     // Web app might not be running, that's okay
     console.error("Web sync failed (web app may not be running):", error);
@@ -970,6 +1024,14 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("FlowState MCP Server running on stdio");
+
+  // Send initial connect event
+  await sendIDEConnect();
+
+  // Send periodic heartbeats every 10 seconds
+  setInterval(async () => {
+    await sendIDEHeartbeat();
+  }, 10000);
 }
 
 main().catch(console.error);

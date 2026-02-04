@@ -174,6 +174,13 @@ Quick tip: Try unconventional approaches
 - Activity heatmap
 - AI-powered insights
 
+### 🔗 IDE Connection Analytics
+- **Real-time connection tracking** - See how long your IDE has been connected
+- **Live session counter** - Updates every second when connected
+- **Historical data** - Track daily, weekly, and all-time connection time
+- **Multi-IDE support** - Track connections from Cursor, VS Code, Windsurf, IntelliJ
+- **Disconnect detection** - Visual indicator when IDE disconnects with tooltip
+
 ---
 
 ## 🛠️ Tech Stack
@@ -256,8 +263,10 @@ flowstate/
 │   │   │   │   └── spotify/       # Spotify OAuth callback
 │   │   │   ├── contact/
 │   │   │   │   └── route.ts       # Contact form API
-│   │   │   └── flowstate/
-│   │   │       └── route.ts       # MCP sync endpoint
+│   │   │   ├── flowstate/
+│   │   │   │   └── route.ts       # MCP sync endpoint
+│   │   │   └── ide-connection/
+│   │   │       └── route.ts       # IDE connection tracking API
 │   │   ├── favicon.ico
 │   │   ├── globals.css
 │   │   ├── layout.tsx
@@ -270,6 +279,8 @@ flowstate/
 │   │   │   ├── footer.tsx
 │   │   │   ├── header.tsx
 │   │   │   ├── hero-section.tsx
+│   │   │   ├── ide-analytics.tsx      # IDE connection analytics
+│   │   │   ├── ide-connection-counter.tsx  # Live connection counter
 │   │   │   ├── index.ts
 │   │   │   ├── mood-selector.tsx
 │   │   │   └── music-recommendations.tsx
@@ -288,6 +299,7 @@ flowstate/
 │   │   ├── index.ts
 │   │   ├── use-analytics.ts
 │   │   ├── use-flowstate-sync.ts  # IDE sync hook
+│   │   ├── use-ide-connection.ts  # IDE connection tracking hook
 │   │   └── use-music.ts
 │   ├── lib/
 │   │   ├── analytics.ts
