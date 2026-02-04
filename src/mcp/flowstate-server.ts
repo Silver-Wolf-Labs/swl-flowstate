@@ -62,8 +62,14 @@ function detectIDE(): "cursor" | "vscode" | "windsurf" | "intellij" | "unknown" 
   return "cursor";
 }
 
+// Track whether IDE connection is active (controls heartbeat sending)
+let isIDEConnected = false;
+
 // Send IDE connection heartbeat
 async function sendIDEHeartbeat() {
+  // Only send heartbeat if connected
+  if (!isIDEConnected) return;
+
   try {
     const ide = detectIDE();
     await fetch(`${WEB_APP_URL}/api/ide-connection`, {
@@ -86,6 +92,7 @@ async function sendIDEConnect() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "connect", ide }),
     });
+    isIDEConnected = true;
   } catch (error) {
     console.error("IDE connect failed:", error);
   }
@@ -100,6 +107,7 @@ async function sendIDEDisconnect() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "disconnect", ide }),
     });
+    isIDEConnected = false;
   } catch (error) {
     console.error("IDE disconnect failed:", error);
   }
