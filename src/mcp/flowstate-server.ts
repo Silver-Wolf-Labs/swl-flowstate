@@ -32,7 +32,20 @@ function detectIDE(): "cursor" | "vscode" | "windsurf" | "intellij" | "unknown" 
   const vscodeIpcHook = process.env.VSCODE_IPC_HOOK || "";
   const cursorIpcHook = process.env.CURSOR_IPC_HOOK || "";
 
-  if (cursorIpcHook || termProgram.toLowerCase().includes("cursor")) {
+  // Additional Cursor detection - check various env vars that Cursor sets
+  const isCursor =
+    cursorIpcHook ||
+    termProgram.toLowerCase().includes("cursor") ||
+    process.env.CURSOR_TRACE_ID ||
+    process.env.CURSOR_CHANNEL ||
+    (process.env.APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL && vscodeIpcHook?.includes("cursor")) ||
+    process.env.__CFBundleIdentifier?.includes("cursor") ||
+    process.env.XPC_SERVICE_NAME?.includes("cursor") ||
+    // MCP servers in Cursor are typically spawned with cursor in the path
+    process.env._?.includes("cursor") ||
+    process.argv.some(arg => arg.toLowerCase().includes("cursor"));
+
+  if (isCursor) {
     return "cursor";
   }
   if (vscodeIpcHook || termProgram.toLowerCase().includes("vscode")) {
