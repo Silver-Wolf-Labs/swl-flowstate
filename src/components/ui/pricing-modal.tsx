@@ -17,6 +17,18 @@ interface SetupStatus {
   selectedIDEs: string[];
 }
 
+// Pricing configuration
+const PRICING = {
+  pro: {
+    monthly: 4,
+    annual: 38, // $3.17/month - ~21% discount
+  },
+  team: {
+    monthly: 10,
+    annual: 96, // $8/month - 20% discount
+  },
+};
+
 const getFreePlan = (isSetupComplete: boolean) => ({
   name: "Free",
   price: "$0",
@@ -33,45 +45,52 @@ const getFreePlan = (isSetupComplete: boolean) => ({
   isSetupTrigger: !isSetupComplete,
   popular: false,
 });
-const paidPlans = [
+
+const getPaidPlans = (isAnnual: boolean) => [
   {
     name: "Pro",
-    price: "$9",
-    period: "/month",
+    price: isAnnual ? `$${PRICING.pro.annual}` : `$${PRICING.pro.monthly}`,
+    period: isAnnual ? "/year" : "/month",
+    monthlyEquivalent: isAnnual ? `$${(PRICING.pro.annual / 12).toFixed(2)}/mo` : null,
+    savings: isAnnual ? `Save $${PRICING.pro.monthly * 12 - PRICING.pro.annual}/year` : null,
     description: "For serious productivity",
     features: [
       "Everything in Free",
-      "Spotify & SoundCloud integration",
-      "Advanced analytics & insights",
       "Custom mood presets",
+      "Advanced analytics & insights",
+      "Custom themes",
       "Priority support",
-      "No ads",
+      "API access",
     ],
     cta: "Upgrade to Pro",
     popular: true,
     disabled: false,
+    priceId: isAnnual ? "pro_annual" : "pro_monthly",
   },
   {
     name: "Team",
-    price: "$29",
-    period: "/month",
+    price: isAnnual ? `$${PRICING.team.annual}` : `$${PRICING.team.monthly}`,
+    period: isAnnual ? "/year" : "/month",
+    monthlyEquivalent: isAnnual ? `$${(PRICING.team.annual / 12).toFixed(2)}/mo` : null,
+    savings: isAnnual ? `Save $${PRICING.team.monthly * 12 - PRICING.team.annual}/year` : null,
     description: "For teams and organizations",
     features: [
       "Everything in Pro",
       "Team dashboard",
       "Shared playlists",
-      "Admin controls",
-      "API access",
-      "Dedicated support",
+      "Dedicated 24/7 support",
     ],
-    cta: "Contact Sales",
+    cta: "Upgrade to Team",
     disabled: false,
     popular: false,
+    priceId: isAnnual ? "team_annual" : "team_monthly",
   },
 ];
 
 export function PricingModal({ isOpen, onClose }: PricingModalProps) {
   const [showSetupWizard, setShowSetupWizard] = useState(false);
+  const [isAnnual, setIsAnnual] = useState(true); // Default to annual for better value
+  const [isLoading, setIsLoading] = useState<string | null>(null);
   const [setupStatus, setSetupStatus] = useState<SetupStatus>({
     isComplete: false,
     completedAt: null,
@@ -108,44 +127,56 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
   }, [isOpen]);
 
   const freePlan = getFreePlan(setupStatus.isComplete);
+  const paidPlans = getPaidPlans(isAnnual);
   const plans = [freePlan, ...paidPlans];
 
-  const handlePlanClick = async (plan: typeof plans[0]) => {
+  const handlePlanClick = async (plan: (typeof plans)[0]) => {
     // Handle Free plan setup trigger
     if (plan.name === "Free" && !setupStatus.isComplete) {
       setShowSetupWizard(true);
       return;
     }
 
-    // Handle paid plans
+    // Handle paid plans - redirect to Stripe Checkout
     if (plan.name === "Pro" || plan.name === "Team") {
+      const priceId = "priceId" in plan ? plan.priceId : null;
+      if (!priceId) return;
+
+      setIsLoading(plan.name);
       try {
-        const response = await fetch("/api/contact", {
+        const response = await fetch("/api/stripe/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name: "Pricing Inquiry",
-            email: "user@flowstate.app",
-            message: `User is interested in the ${plan.name} plan. Please follow up.`,
-            type: "pricing",
+            priceId,
+            planName: plan.name,
+            isAnnual,
           }),
         });
 
-        if (response.ok) {
-          const subject = encodeURIComponent(`FlowState ${plan.name} Plan Interest`);
-          const body = encodeURIComponent(`Hi,\n\nI'm interested in the ${plan.name} plan for FlowState.\n\nPlease send me more information about pricing and features.\n\nThanks!`);
-          window.open(`mailto:fabriziomendezalberti@gmail.com?subject=${subject}&body=${body}`, "_blank");
+        const data = await response.json();
+
+        if (data.url) {
+          // Redirect to Stripe Checkout
+          window.location.href = data.url;
+        } else if (data.error === "STRIPE_NOT_CONFIGURED") {
+          // Stripe not configured yet - show message
+          alert("Payment system is being set up. Please check back soon or contact us for early access!");
+        } else {
+          console.error("Checkout error:", data.error);
+          alert("Something went wrong. Please try again.");
         }
-      } catch {
-        const subject = encodeURIComponent(`FlowState ${plan.name} Plan Interest`);
-        const body = encodeURIComponent(`Hi,\n\nI'm interested in the ${plan.name} plan for FlowState.\n\nPlease send me more information about pricing and features.\n\nThanks!`);
-        window.open(`mailto:fabriziomendezalberti@gmail.com?subject=${subject}&body=${body}`, "_blank");
+      } catch (error) {
+        console.error("Checkout error:", error);
+        alert("Something went wrong. Please try again.");
+      } finally {
+        setIsLoading(null);
       }
     }
   };
 
   const handleSetupComplete = () => {
-    setSetupStatus(prev => ({ ...prev, isComplete: true }));
+    setSetupStatus((prev) => ({ ...prev, isComplete: true }));
     setShowSetupWizard(false);
   };
 
@@ -189,58 +220,121 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
 
               {/* Scrollable content */}
               <div className="p-4 sm:p-6 overflow-y-auto flex-1">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-                  {plans.map((plan, index) => (
+                {/* Billing Toggle */}
+                <div className="flex items-center justify-center gap-4 mb-6">
+                  <span className={`text-sm ${!isAnnual ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+                    Monthly
+                  </span>
+                  <button
+                    onClick={() => setIsAnnual(!isAnnual)}
+                    className={`relative w-14 h-7 rounded-full transition-colors ${
+                      isAnnual ? "bg-primary" : "bg-secondary"
+                    }`}
+                  >
                     <motion.div
-                      key={plan.name}
-                      className={`relative p-4 sm:p-6 rounded-xl border ${
-                        plan.popular
-                          ? "border-primary bg-primary/5"
-                          : "border-border bg-secondary/30"
-                      }`}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
+                      className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
+                      animate={{ left: isAnnual ? "calc(100% - 24px)" : "4px" }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  </button>
+                  <span className={`text-sm ${isAnnual ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+                    Annual
+                  </span>
+                  {isAnnual && (
+                    <motion.span
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="px-2 py-0.5 bg-green-500/20 text-green-500 text-xs font-medium rounded-full"
                     >
-                      {plan.popular && (
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full">
-                          Most Popular
-                        </div>
-                      )}
+                      Save up to 21%
+                    </motion.span>
+                  )}
+                </div>
 
-                      <div className="text-center mb-4 sm:mb-6">
-                        <h3 className="text-lg font-semibold mb-1 sm:mb-2">{plan.name}</h3>
-                        <div className="flex items-baseline justify-center gap-1">
-                          <span className="text-3xl sm:text-4xl font-bold">{plan.price}</span>
-                          <span className="text-muted-foreground text-sm">{plan.period}</span>
-                        </div>
-                        <p className="text-xs sm:text-sm text-muted-foreground mt-1 sm:mt-2">
-                          {plan.description}
-                        </p>
-                      </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                  {plans.map((plan, index) => {
+                    const monthlyEquivalent = "monthlyEquivalent" in plan ? plan.monthlyEquivalent : null;
+                    const savings = "savings" in plan ? plan.savings : null;
 
-                      <ul className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
-                        {plan.features.map((feature) => (
-                          <li key={feature} className="flex items-start gap-2 text-xs sm:text-sm">
-                            <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-
-                      <Button
-                        variant={plan.popular ? "gradient" : plan.name === "Free" && !setupStatus.isComplete ? "default" : "outline"}
-                        className="w-full"
-                        disabled={plan.disabled}
-                        onClick={() => handlePlanClick(plan)}
+                    return (
+                      <motion.div
+                        key={plan.name}
+                        className={`relative p-4 sm:p-6 rounded-xl border ${
+                          plan.popular
+                            ? "border-primary bg-primary/5"
+                            : "border-border bg-secondary/30"
+                        }`}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
                       >
-                        {plan.name === "Free" && !setupStatus.isComplete && (
-                          <Settings className="w-4 h-4 mr-1.5" />
+                        {plan.popular && (
+                          <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full">
+                            Most Popular
+                          </div>
                         )}
-                        {plan.cta}
-                      </Button>
-                    </motion.div>
-                  ))}
+
+                        <div className="text-center mb-4 sm:mb-6">
+                          <h3 className="text-lg font-semibold mb-1 sm:mb-2">{plan.name}</h3>
+                          <div className="flex items-baseline justify-center gap-1">
+                            <span className="text-3xl sm:text-4xl font-bold">{plan.price}</span>
+                            <span className="text-muted-foreground text-sm">{plan.period}</span>
+                          </div>
+                          {monthlyEquivalent && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {monthlyEquivalent}
+                            </p>
+                          )}
+                          {savings && (
+                            <motion.p
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              className="text-xs text-green-500 font-medium mt-1"
+                            >
+                              {savings}
+                            </motion.p>
+                          )}
+                          <p className="text-xs sm:text-sm text-muted-foreground mt-1 sm:mt-2">
+                            {plan.description}
+                          </p>
+                        </div>
+
+                        <ul className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
+                          {plan.features.map((feature) => (
+                            <li key={feature} className="flex items-start gap-2 text-xs sm:text-sm">
+                              <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+
+                        <Button
+                          variant={plan.popular ? "gradient" : plan.name === "Free" && !setupStatus.isComplete ? "default" : "outline"}
+                          className="w-full"
+                          disabled={plan.disabled || isLoading === plan.name}
+                          onClick={() => handlePlanClick(plan)}
+                        >
+                          {isLoading === plan.name ? (
+                            <>
+                              <motion.div
+                                className="w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                              />
+                              Processing...
+                            </>
+                          ) : (
+                            <>
+                              {plan.name === "Free" && !setupStatus.isComplete && (
+                                <Settings className="w-4 h-4 mr-1.5" />
+                              )}
+                              {plan.cta}
+                            </>
+                          )}
+                        </Button>
+                      </motion.div>
+                    );
+                  })}
                 </div>
 
                 {/* Payment methods */}
