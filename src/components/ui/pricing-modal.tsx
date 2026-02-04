@@ -66,6 +66,7 @@ const paidPlans = [
     ],
     cta: "Contact Sales",
     disabled: false,
+    popular: false,
   },
 ];
 

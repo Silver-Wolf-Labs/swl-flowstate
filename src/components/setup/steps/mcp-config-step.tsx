@@ -24,10 +24,10 @@ export function MCPConfigStep({
   const [currentIDEIndex, setCurrentIDEIndex] = useState(0);
   const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({});
 
-  const currentIDE = selectedIDEs[currentIDEIndex];
+  const currentIDE = selectedIDEs[currentIDEIndex] || "cursor";
   const currentConfig = mcpConfigs[currentIDE];
   const currentPath = configPaths[currentIDE];
-  const configJson = JSON.stringify(currentConfig, null, 2);
+  const configJson = currentConfig ? JSON.stringify(currentConfig, null, 2) : "{}";
 
   const handleCopy = async (text: string, key: string) => {
     await navigator.clipboard.writeText(text);
