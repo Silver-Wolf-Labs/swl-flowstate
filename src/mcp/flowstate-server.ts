@@ -21,6 +21,9 @@ import {
   ListResourcesRequestSchema,
   ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
+import * as os from "os";
+import * as fs from "fs";
+import * as path from "path";
 
 // Web app sync URL - defaults to production, set FLOWSTATE_WEB_URL=http://localhost:3000 for local dev
 const WEB_APP_URL = process.env.FLOWSTATE_WEB_URL || "https://flowstate-swl.vercel.app";
@@ -62,14 +65,37 @@ function detectIDE(): "cursor" | "vscode" | "windsurf" | "intellij" | "unknown" 
   return "cursor";
 }
 
-// Track whether IDE connection is active (controls heartbeat sending)
-let isIDEConnected = false;
+// File-based flag to track IDE connection state (shared across all MCP server instances)
+const CONNECTION_FLAG_FILE = path.join(os.tmpdir(), "flowstate-ide-connected");
+
+// Check if IDE is connected (reads from file)
+function isIDEConnectedFlag(): boolean {
+  try {
+    return fs.existsSync(CONNECTION_FLAG_FILE);
+  } catch {
+    return false;
+  }
+}
+
+// Set IDE connection state (writes to file)
+function setIDEConnectedFlag(connected: boolean) {
+  try {
+    if (connected) {
+      fs.writeFileSync(CONNECTION_FLAG_FILE, Date.now().toString());
+    } else {
+      if (fs.existsSync(CONNECTION_FLAG_FILE)) {
+        fs.unlinkSync(CONNECTION_FLAG_FILE);
+      }
+    }
+  } catch (error) {
+    console.error("Failed to update connection flag:", error);
+  }
+}
 
 // Send IDE connection heartbeat
 async function sendIDEHeartbeat() {
-  // Only send heartbeat if connected
-  if (!isIDEConnected) {
-    console.error(`[FlowState] Skipping heartbeat - isIDEConnected is false`);
+  // Only send heartbeat if connected (check file flag)
+  if (!isIDEConnectedFlag()) {
     return;
   }
 
@@ -95,7 +121,7 @@ async function sendIDEConnect() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "connect", ide }),
     });
-    isIDEConnected = true;
+    setIDEConnectedFlag(true);
   } catch (error) {
     console.error("IDE connect failed:", error);
   }
@@ -105,14 +131,12 @@ async function sendIDEConnect() {
 async function sendIDEDisconnect() {
   try {
     const ide = detectIDE();
-    console.error(`[FlowState] Disconnecting IDE: ${ide}, setting isIDEConnected to false`);
+    setIDEConnectedFlag(false); // Set flag BEFORE sending request so other processes stop immediately
     await fetch(`${WEB_APP_URL}/api/ide-connection`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "disconnect", ide }),
     });
-    isIDEConnected = false;
-    console.error(`[FlowState] isIDEConnected is now: ${isIDEConnected}`);
   } catch (error) {
     console.error("IDE disconnect failed:", error);
   }
