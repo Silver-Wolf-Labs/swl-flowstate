@@ -85,11 +85,17 @@ export const curatedLofiStreams = {
     },
   ],
   calm: [
-    // Verified 24/7 Livestream
+    // Verified 24/7 Livestreams
     {
       id: "rUxyKA_-grg", // Lofi Girl Sleep - verified 24/7
       title: "Lofi Sleep Radio - beats to sleep/chill to",
       channelTitle: "Lofi Girl",
+      isLive: true,
+    },
+    {
+      id: "HuFYqnbVbzY", // Calm livestream
+      title: "Calm & Relaxing Live Stream",
+      channelTitle: "Calm Music",
       isLive: true,
     },
     // Video mixes (shuffled on each load)
