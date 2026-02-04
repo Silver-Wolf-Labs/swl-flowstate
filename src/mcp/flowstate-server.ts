@@ -95,12 +95,16 @@ function setIDEConnectedFlag(connected: boolean) {
 // Send IDE connection heartbeat
 async function sendIDEHeartbeat() {
   // Only send heartbeat if connected (check file flag)
-  if (!isIDEConnectedFlag()) {
+  const connected = isIDEConnectedFlag();
+  console.error(`[FlowState] Heartbeat check - file exists: ${connected}, path: ${CONNECTION_FLAG_FILE}`);
+  if (!connected) {
+    console.error(`[FlowState] Skipping heartbeat - not connected`);
     return;
   }
 
   try {
     const ide = detectIDE();
+    console.error(`[FlowState] Sending heartbeat for ${ide}`);
     await fetch(`${WEB_APP_URL}/api/ide-connection`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
