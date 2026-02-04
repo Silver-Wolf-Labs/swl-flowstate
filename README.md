@@ -324,6 +324,14 @@ This project is licensed under the MIT License – see the [LICENSE](LICENSE.md)
   <strong>FlowState</strong> · Control your flow from anywhere
 </p>
 
+---
+
+## 🐺 About Silver Wolf Labs
+
+Silver Wolf Labs builds productivity tools and automation solutions that help developers and professionals work smarter, not harder.
+
+---
+
 <p align="center">
   <sub>Made with ❤️ and lots of ☕ by Silver Wolf Labs</sub>
 </p>
