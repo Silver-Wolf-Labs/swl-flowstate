@@ -68,7 +68,10 @@ let isIDEConnected = false;
 // Send IDE connection heartbeat
 async function sendIDEHeartbeat() {
   // Only send heartbeat if connected
-  if (!isIDEConnected) return;
+  if (!isIDEConnected) {
+    console.error(`[FlowState] Skipping heartbeat - isIDEConnected is false`);
+    return;
+  }
 
   try {
     const ide = detectIDE();
@@ -102,12 +105,14 @@ async function sendIDEConnect() {
 async function sendIDEDisconnect() {
   try {
     const ide = detectIDE();
+    console.error(`[FlowState] Disconnecting IDE: ${ide}, setting isIDEConnected to false`);
     await fetch(`${WEB_APP_URL}/api/ide-connection`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "disconnect", ide }),
     });
     isIDEConnected = false;
+    console.error(`[FlowState] isIDEConnected is now: ${isIDEConnected}`);
   } catch (error) {
     console.error("IDE disconnect failed:", error);
   }
