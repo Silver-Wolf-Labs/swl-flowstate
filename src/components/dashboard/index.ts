@@ -8,3 +8,4 @@ export { AnalyticsPreview } from "./analytics-preview";
 export { Footer } from "./footer";
 export { IDEConnectionCounter } from "./ide-connection-counter";
 export { IDEAnalytics } from "./ide-analytics";
+export { IDEIcon } from "./ide-icon";

@@ -163,19 +163,6 @@ export function useIDEConnection() {
     return ide ? names[ide] : "IDE";
   }, []);
 
-  // Get IDE icon
-  const getIDEIcon = useCallback((ide: IDEType | null): string => {
-    const icons: Record<IDEType, string> = {
-      "claude-code": "✳️",
-      cursor: "🖱️",
-      vscode: "💻",
-      windsurf: "🏄",
-      intellij: "🧠",
-      unknown: "🖥️",
-    };
-    return ide ? icons[ide] : "🖥️";
-  }, []);
-
   return {
     // State
     connectionState,
@@ -198,7 +185,6 @@ export function useIDEConnection() {
     formatTime,
     formatTimeShort,
     getIDEDisplayName,
-    getIDEIcon,
   };
 }
 

@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, Badge } from
 import { useIDEConnection, type IDEType } from "@/hooks";
 import { cn } from "@/lib/utils";
 import { IDEConnectionCounter } from "./ide-connection-counter";
+import { IDEIcon } from "./ide-icon";
 
 type TabType = "current" | "cumulative" | "history";
 
@@ -23,7 +24,6 @@ export function IDEAnalytics() {
     formatTime,
     formatTimeShort,
     getIDEDisplayName,
-    getIDEIcon,
   } = useIDEConnection();
 
   const tabs: { id: TabType; label: string; icon: React.ElementType }[] = [
@@ -149,7 +149,7 @@ export function IDEAnalytics() {
                             animate={{ opacity: [1, 0.4, 1] }}
                             transition={{ duration: 2, repeat: Infinity }}
                           />
-                          <span>{getIDEIcon(ide)}</span>
+                          <IDEIcon ide={ide} className="w-3.5 h-3.5" />
                           {getIDEDisplayName(ide)}
                         </span>
                       ))}
@@ -205,7 +205,7 @@ export function IDEAnalytics() {
                       return (
                         <div key={ide} className="flex items-center justify-between text-sm">
                           <span className="flex items-center gap-2">
-                            <span>{getIDEIcon(ide)}</span>
+                            <IDEIcon ide={ide} />
                             <span className="font-medium">{getIDEDisplayName(ide)}</span>
                             {isLive && (
                               <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500">

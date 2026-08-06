@@ -5,6 +5,7 @@ import { Monitor, MonitorOff, Clock, Zap } from "lucide-react";
 import { useIDEConnection } from "@/hooks";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { IDEIcon } from "./ide-icon";
 
 interface IDEConnectionCounterProps {
   variant?: "compact" | "full";
@@ -19,7 +20,6 @@ export function IDEConnectionCounter({ variant = "compact", className }: IDEConn
     liveSessionTime,
     formatTimeShort,
     getIDEDisplayName,
-    getIDEIcon,
   } = useIDEConnection();
 
   const [showTooltip, setShowTooltip] = useState(false);
@@ -109,10 +109,13 @@ export function IDEConnectionCounter({ variant = "compact", className }: IDEConn
             "p-2 rounded-lg",
             isConnected ? "bg-emerald-500/10" : "bg-muted"
           )}>
-            {isConnected ? (
-              <Monitor className="w-5 h-5 text-emerald-500" />
-            ) : (
+            {!isConnected ? (
               <MonitorOff className="w-5 h-5 text-muted-foreground" />
+            ) : connectedClients.length === 1 ? (
+              // Single client: show its own mark instead of a generic monitor
+              <IDEIcon ide={connectedClients[0]} className="w-5 h-5 text-lg leading-none" />
+            ) : (
+              <Monitor className="w-5 h-5 text-emerald-500" />
             )}
           </div>
           <div>
@@ -120,9 +123,19 @@ export function IDEConnectionCounter({ variant = "compact", className }: IDEConn
               "font-medium",
               isConnected ? "text-emerald-500" : "text-muted-foreground"
             )}>
-              {isConnected
-                ? connectedClients.map(ide => `${getIDEIcon(ide)} ${getIDEDisplayName(ide)}`).join(" + ")
-                : "IDE Disconnected"}
+              {isConnected ? (
+                <span className="flex items-center gap-1.5 flex-wrap">
+                  {connectedClients.map((ide, index) => (
+                    <span key={ide} className="flex items-center gap-1.5">
+                      {index > 0 && <span className="text-muted-foreground">+</span>}
+                      <IDEIcon ide={ide} />
+                      {getIDEDisplayName(ide)}
+                    </span>
+                  ))}
+                </span>
+              ) : (
+                "IDE Disconnected"
+              )}
             </p>
             <p className="text-xs text-muted-foreground">
               {isConnected

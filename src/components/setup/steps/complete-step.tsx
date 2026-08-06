@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { CheckCircle, Sparkles, ExternalLink, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { IDEType, IDE_INFO } from "../types";
+import { IDEIcon } from "@/components/dashboard/ide-icon";
 
 interface CompleteStepProps {
   selectedIDEs: IDEType[];
@@ -64,7 +65,7 @@ export function CompleteStep({ selectedIDEs, onClose }: CompleteStepProps) {
                 key={ide}
                 className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm flex items-center gap-1.5"
               >
-                {IDE_INFO[ide].icon} {IDE_INFO[ide].name}
+                <IDEIcon ide={ide} /> {IDE_INFO[ide].name}
               </span>
             ))}
           </div>

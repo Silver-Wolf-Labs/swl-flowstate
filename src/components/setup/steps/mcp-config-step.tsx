@@ -5,6 +5,7 @@ import { Settings, Copy, Check, ChevronRight, ChevronLeft, ExternalLink } from "
 import { Button } from "@/components/ui/button";
 import { IDEType, IDE_INFO, MCPConfig } from "../types";
 import { useState } from "react";
+import { IDEIcon } from "@/components/dashboard/ide-icon";
 
 interface MCPConfigStepProps {
   selectedIDEs: IDEType[];
@@ -92,7 +93,10 @@ export function MCPConfigStep({
                   : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
               }`}
             >
-              {IDE_INFO[ide].icon} {IDE_INFO[ide].name}
+              <span className="flex items-center gap-1.5">
+                <IDEIcon ide={ide} />
+                {IDE_INFO[ide].name}
+              </span>
             </button>
           ))}
         </div>

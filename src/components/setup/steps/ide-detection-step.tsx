@@ -5,6 +5,7 @@ import { Monitor, Check, ChevronRight, ChevronLeft, RefreshCw, Loader2, Info } f
 import { Button } from "@/components/ui/button";
 import { DetectedIDE, IDEType, IDE_INFO } from "../types";
 import { useState, useEffect } from "react";
+import { IDEIcon } from "@/components/dashboard/ide-icon";
 
 interface IDEDetectionStepProps {
   detectedIDEs: DetectedIDE[];
@@ -115,7 +116,7 @@ export function IDEDetectionStep({
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{IDE_INFO[ide.id].icon}</span>
+                    <IDEIcon ide={ide.id} className="text-2xl w-6 h-6" />
                     <div>
                       <div className="font-medium">{IDE_INFO[ide.id].name}</div>
                       <div className="text-xs text-muted-foreground">
