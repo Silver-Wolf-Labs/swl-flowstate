@@ -3,7 +3,7 @@ import path from "path";
 import os from "os";
 import { promises as fs } from "fs";
 
-type IDEType = "cursor" | "vscode" | "windsurf" | "intellij";
+type IDEType = "claude-code" | "cursor" | "vscode" | "windsurf" | "intellij";
 
 interface MCPConfig {
   mcpServers: {
@@ -53,18 +53,21 @@ function getConfigPath(ide: IDEType): string {
 
   const paths: Record<string, Record<IDEType, string>> = {
     darwin: {
+      "claude-code": `${homeDir}/.claude.json`,
       cursor: `${homeDir}/.cursor/mcp.json`,
       vscode: `${homeDir}/Library/Application Support/Code/User/mcp.json`,
       windsurf: `${homeDir}/.windsurf/mcp.json`,
       intellij: `${homeDir}/Library/Application Support/JetBrains/mcp.json`,
     },
     win32: {
+      "claude-code": `${homeDir}/.claude.json`,
       cursor: `${process.env.APPDATA || homeDir + "/AppData/Roaming"}/Cursor/mcp.json`,
       vscode: `${process.env.APPDATA || homeDir + "/AppData/Roaming"}/Code/User/mcp.json`,
       windsurf: `${process.env.APPDATA || homeDir + "/AppData/Roaming"}/Windsurf/mcp.json`,
       intellij: `${process.env.APPDATA || homeDir + "/AppData/Roaming"}/JetBrains/mcp.json`,
     },
     linux: {
+      "claude-code": `${homeDir}/.claude.json`,
       cursor: `${homeDir}/.config/Cursor/mcp.json`,
       vscode: `${homeDir}/.config/Code/User/mcp.json`,
       windsurf: `${homeDir}/.config/Windsurf/mcp.json`,

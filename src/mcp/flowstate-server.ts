@@ -29,11 +29,24 @@ import * as path from "path";
 const WEB_APP_URL = process.env.FLOWSTATE_WEB_URL || "https://flowstate-swl.vercel.app";
 
 // Detect which IDE is running based on environment
-function detectIDE(): "cursor" | "vscode" | "windsurf" | "intellij" | "unknown" {
+function detectIDE(): "claude-code" | "cursor" | "vscode" | "windsurf" | "intellij" | "unknown" {
   // Check common environment variables set by IDEs
   const termProgram = process.env.TERM_PROGRAM || "";
   const vscodeIpcHook = process.env.VSCODE_IPC_HOOK || "";
   const cursorIpcHook = process.env.CURSOR_IPC_HOOK || "";
+
+  // Claude Code is checked first: it can run inside another IDE's terminal
+  // (Cursor, VS Code), but it is the client actually talking to this MCP server.
+  const isClaudeCode =
+    process.env.CLAUDECODE === "1" ||
+    process.env.CLAUDE_CODE_ENTRYPOINT ||
+    process.env.CLAUDE_CODE_SESSION_ID ||
+    process.env.CLAUDE_CODE_EXECPATH ||
+    process.env.AI_AGENT?.startsWith("claude-code");
+
+  if (isClaudeCode) {
+    return "claude-code";
+  }
 
   // Additional Cursor detection - check various env vars that Cursor sets
   const isCursor =

@@ -28,6 +28,12 @@ export function MCPConfigStep({
   const currentConfig = mcpConfigs[currentIDE];
   const currentPath = configPaths[currentIDE];
   const configJson = currentConfig ? JSON.stringify(currentConfig, null, 2) : "{}";
+  const isClaudeCode = currentIDE === "claude-code";
+
+  // Claude Code registers MCP servers from the CLI rather than a settings pane
+  const claudeCodeCommand = `claude mcp add flowstate --scope user -- ${
+    currentConfig?.mcpServers.flowstate.command ?? "run-server.sh"
+  }`;
 
   const handleCopy = async (text: string, key: string) => {
     await navigator.clipboard.writeText(text);
@@ -138,15 +144,46 @@ export function MCPConfigStep({
             </pre>
           </div>
 
+          {/* One-line CLI alternative for Claude Code */}
+          {isClaudeCode && (
+            <div className="relative">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium">Or add it from the terminal:</span>
+                <button
+                  onClick={() => handleCopy(claudeCodeCommand, `cli-${currentIDE}`)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-sm hover:bg-primary/20 transition-colors"
+                >
+                  {copiedStates[`cli-${currentIDE}`] ? (
+                    <><Check className="w-4 h-4" /> Copied!</>
+                  ) : (
+                    <><Copy className="w-4 h-4" /> Copy Command</>
+                  )}
+                </button>
+              </div>
+              <pre className="p-4 rounded-xl bg-[#1e1e1e] border border-border overflow-x-auto text-xs">
+                <code className="text-green-400">{claudeCodeCommand}</code>
+              </pre>
+            </div>
+          )}
+
           {/* Instructions */}
           <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
             <h4 className="text-sm font-medium mb-2">Setup Instructions:</h4>
-            <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
-              <li>Open {IDE_INFO[currentIDE].name} settings</li>
-              <li>Navigate to MCP configuration</li>
-              <li>Paste the configuration above</li>
-              <li>Restart {IDE_INFO[currentIDE].name}</li>
-            </ol>
+            {isClaudeCode ? (
+              <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+                <li>Run the command above in your terminal</li>
+                <li>Or paste the JSON into the config file at the path above</li>
+                <li>Verify with <code className="text-foreground">/mcp</code> inside Claude Code</li>
+                <li>Restart Claude Code if it was already running</li>
+              </ol>
+            ) : (
+              <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+                <li>Open {IDE_INFO[currentIDE].name} settings</li>
+                <li>Navigate to MCP configuration</li>
+                <li>Paste the configuration above</li>
+                <li>Restart {IDE_INFO[currentIDE].name}</li>
+              </ol>
+            )}
           </div>
         </motion.div>
       </AnimatePresence>

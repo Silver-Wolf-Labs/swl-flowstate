@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Monitor, Clock, Calendar, TrendingUp, Zap, History, BarChart3 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, Badge } from "@/components/ui";
-import { useIDEConnection } from "@/hooks";
+import { useIDEConnection, type IDEType } from "@/hooks";
 import { cn } from "@/lib/utils";
 import { IDEConnectionCounter } from "./ide-connection-counter";
 
@@ -15,6 +15,7 @@ export function IDEAnalytics() {
   const {
     isConnected,
     connectedIDE,
+    activeIDEs,
     liveSessionTime,
     history,
     configuredIDEs,
@@ -22,6 +23,7 @@ export function IDEAnalytics() {
     formatTime,
     formatTimeShort,
     getIDEDisplayName,
+    getIDEIcon,
   } = useIDEConnection();
 
   const tabs: { id: TabType; label: string; icon: React.ElementType }[] = [
@@ -49,6 +51,18 @@ export function IDEAnalytics() {
 
   const last7Days = getLast7Days();
   const maxDayTime = Math.max(...last7Days.map(d => d.time), 1);
+
+  // Clients live right now. Falls back to the headline IDE for older API
+  // responses that don't report a client list.
+  const connectedClients = activeIDEs.length > 0
+    ? activeIDEs
+    : (isConnected && connectedIDE ? [connectedIDE] : []);
+
+  // Per-client cumulative totals, busiest first
+  const ideTotals = Object.entries(history.ideBreakdown || {})
+    .map(([ide, entry]) => ({ ide: ide as IDEType, ...entry }))
+    .filter(entry => entry.totalTime > 0 || entry.sessionsCount > 0)
+    .sort((a, b) => b.totalTime - a.totalTime);
 
   return (
     <Card variant="gradient">
@@ -99,22 +113,49 @@ export function IDEAnalytics() {
               className="space-y-4"
             >
               <IDEConnectionCounter variant="full" />
-              
+
               {isConnected && (
-                <div className="grid grid-cols-2 gap-3">
-                  <StatBox
-                    icon={Clock}
-                    label="Session Duration"
-                    value={formatTimeShort(liveSessionTime)}
-                    color="emerald"
-                  />
-                  <StatBox
-                    icon={Monitor}
-                    label="Connected IDE"
-                    value={getIDEDisplayName(connectedIDE)}
-                    color="blue"
-                  />
-                </div>
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <StatBox
+                      icon={Clock}
+                      label="Session Duration"
+                      value={formatTimeShort(liveSessionTime)}
+                      color="emerald"
+                    />
+                    <StatBox
+                      icon={Monitor}
+                      label={connectedClients.length > 1 ? "Connected Clients" : "Connected IDE"}
+                      value={
+                        connectedClients.length > 1
+                          ? `${connectedClients.length}`
+                          : getIDEDisplayName(connectedIDE)
+                      }
+                      color="blue"
+                    />
+                  </div>
+
+                  {/* Every client currently connected via MCP */}
+                  <div className="p-3 rounded-lg bg-secondary/30 border border-border/50">
+                    <p className="text-xs text-muted-foreground mb-2">Connected right now:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {connectedClients.map((ide) => (
+                        <span
+                          key={ide}
+                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-500"
+                        >
+                          <motion.span
+                            className="w-1.5 h-1.5 rounded-full bg-emerald-500"
+                            animate={{ opacity: [1, 0.4, 1] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                          />
+                          <span>{getIDEIcon(ide)}</span>
+                          {getIDEDisplayName(ide)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </>
               )}
             </motion.div>
           )}
@@ -153,6 +194,36 @@ export function IDEAnalytics() {
                   color="emerald"
                 />
               </div>
+
+              {/* Time per client */}
+              {ideTotals.length > 0 && (
+                <div className="p-3 rounded-lg bg-secondary/30 border border-border/50">
+                  <p className="text-xs text-muted-foreground mb-2">Time by client:</p>
+                  <div className="space-y-2">
+                    {ideTotals.map(({ ide, totalTime, sessionsCount }) => {
+                      const isLive = connectedClients.includes(ide);
+                      return (
+                        <div key={ide} className="flex items-center justify-between text-sm">
+                          <span className="flex items-center gap-2">
+                            <span>{getIDEIcon(ide)}</span>
+                            <span className="font-medium">{getIDEDisplayName(ide)}</span>
+                            {isLive && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500">
+                                Live
+                              </span>
+                            )}
+                          </span>
+                          <span className="text-muted-foreground text-xs">
+                            <span className="font-mono text-foreground">{formatTime(totalTime)}</span>
+                            {" · "}
+                            {sessionsCount} session{sessionsCount === 1 ? "" : "s"}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Configured IDEs */}
               {isSetupComplete && configuredIDEs.length > 0 && (

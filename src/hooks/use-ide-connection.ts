@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 
-export type IDEType = "cursor" | "vscode" | "windsurf" | "intellij" | "unknown";
+export type IDEType = "claude-code" | "cursor" | "vscode" | "windsurf" | "intellij" | "unknown";
 
 export interface IDEConnectionState {
   isConnected: boolean;
@@ -10,6 +10,13 @@ export interface IDEConnectionState {
   sessionStartTime: number | null;
   lastHeartbeat: number | null;
   currentSessionDuration: number;
+  clients?: Partial<Record<IDEType, number>>;
+}
+
+export interface IDEBreakdownEntry {
+  totalTime: number;
+  sessionsCount: number;
+  lastConnectedAt: string | null;
 }
 
 export interface IDEConnectionHistory {
@@ -19,6 +26,7 @@ export interface IDEConnectionHistory {
   weekConnectionTime: number;
   lastSessionDate: string | null;
   dailyHistory: Record<string, number>;
+  ideBreakdown: Partial<Record<IDEType, IDEBreakdownEntry>>;
 }
 
 export interface SetupStatus {
@@ -43,6 +51,7 @@ const defaultHistory: IDEConnectionHistory = {
   weekConnectionTime: 0,
   lastSessionDate: null,
   dailyHistory: {},
+  ideBreakdown: {},
 };
 
 const defaultSetupStatus: SetupStatus = {
@@ -58,6 +67,7 @@ export function useIDEConnection() {
   const [setupStatus, setSetupStatus] = useState<SetupStatus>(defaultSetupStatus);
   const [isLoading, setIsLoading] = useState(true);
   const [liveSessionTime, setLiveSessionTime] = useState(0);
+  const [activeIDEs, setActiveIDEs] = useState<IDEType[]>([]);
 
   // Fetch connection state from API
   const fetchConnectionState = useCallback(async () => {
@@ -65,7 +75,8 @@ export function useIDEConnection() {
       const response = await fetch("/api/ide-connection");
       const data = await response.json();
       setConnectionState(data.state);
-      setHistory(data.history);
+      setHistory({ ...defaultHistory, ...data.history });
+      setActiveIDEs(data.activeIDEs || []);
 
       // Update live session time
       if (data.state.isConnected && data.state.sessionStartTime) {
@@ -142,6 +153,7 @@ export function useIDEConnection() {
   // Get IDE display name
   const getIDEDisplayName = useCallback((ide: IDEType | null): string => {
     const names: Record<IDEType, string> = {
+      "claude-code": "Claude Code",
       cursor: "Cursor",
       vscode: "VS Code",
       windsurf: "Windsurf",
@@ -149,6 +161,19 @@ export function useIDEConnection() {
       unknown: "IDE",
     };
     return ide ? names[ide] : "IDE";
+  }, []);
+
+  // Get IDE icon
+  const getIDEIcon = useCallback((ide: IDEType | null): string => {
+    const icons: Record<IDEType, string> = {
+      "claude-code": "✳️",
+      cursor: "🖱️",
+      vscode: "💻",
+      windsurf: "🏄",
+      intellij: "🧠",
+      unknown: "🖥️",
+    };
+    return ide ? icons[ide] : "🖥️";
   }, []);
 
   return {
@@ -162,6 +187,7 @@ export function useIDEConnection() {
     // Computed
     isConnected: connectionState.isConnected,
     connectedIDE: connectionState.connectedIDE,
+    activeIDEs,
     configuredIDEs: setupStatus.selectedIDEs as IDEType[],
     isSetupComplete: setupStatus.isComplete,
 
@@ -172,6 +198,7 @@ export function useIDEConnection() {
     formatTime,
     formatTimeShort,
     getIDEDisplayName,
+    getIDEIcon,
   };
 }
 

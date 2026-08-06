@@ -15,12 +15,18 @@ export function IDEConnectionCounter({ variant = "compact", className }: IDEConn
   const {
     isConnected,
     connectedIDE,
+    activeIDEs,
     liveSessionTime,
     formatTimeShort,
     getIDEDisplayName,
+    getIDEIcon,
   } = useIDEConnection();
-  
+
   const [showTooltip, setShowTooltip] = useState(false);
+
+  const connectedClients = activeIDEs.length > 0
+    ? activeIDEs
+    : (isConnected && connectedIDE ? [connectedIDE] : []);
 
   if (variant === "compact") {
     return (
@@ -47,6 +53,11 @@ export function IDEConnectionCounter({ variant = "compact", className }: IDEConn
               transition={{ duration: 2, repeat: Infinity }}
             />
             <Monitor className="w-4 h-4" />
+            <span className="hidden sm:inline">
+              {connectedClients.length > 1
+                ? `${connectedClients.length} clients`
+                : getIDEDisplayName(connectedIDE)}
+            </span>
             <span className="font-mono">{formatTimeShort(liveSessionTime)}</span>
           </>
         ) : (
@@ -109,10 +120,14 @@ export function IDEConnectionCounter({ variant = "compact", className }: IDEConn
               "font-medium",
               isConnected ? "text-emerald-500" : "text-muted-foreground"
             )}>
-              {isConnected ? getIDEDisplayName(connectedIDE) : "IDE Disconnected"}
+              {isConnected
+                ? connectedClients.map(ide => `${getIDEIcon(ide)} ${getIDEDisplayName(ide)}`).join(" + ")
+                : "IDE Disconnected"}
             </p>
             <p className="text-xs text-muted-foreground">
-              {isConnected ? "Connected via MCP" : "Run 'flowstate init' to connect"}
+              {isConnected
+                ? `Connected via MCP${connectedClients.length > 1 ? ` • ${connectedClients.length} clients` : ""}`
+                : "Run 'flowstate init' to connect"}
             </p>
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 export type SetupStep = 'welcome' | 'env-vars' | 'ide-detection' | 'mcp-config' | 'complete';
 
-export type IDEType = 'cursor' | 'vscode' | 'windsurf' | 'intellij';
+export type IDEType = 'claude-code' | 'cursor' | 'vscode' | 'windsurf' | 'intellij';
 
 export interface DetectedIDE {
   id: IDEType;
@@ -40,6 +40,11 @@ export interface SetupState {
 }
 
 export const IDE_INFO: Record<IDEType, { name: string; icon: string; configFileName: string }> = {
+  'claude-code': {
+    name: 'Claude Code',
+    icon: '✳️',
+    configFileName: '.mcp.json',
+  },
   cursor: {
     name: 'Cursor',
     icon: '🖱️',

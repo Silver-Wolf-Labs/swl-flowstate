@@ -20,7 +20,7 @@ function getRedis(): Redis | null {
   return null;
 }
 
-export type IDEType = "cursor" | "vscode" | "windsurf" | "intellij" | "unknown";
+export type IDEType = "claude-code" | "cursor" | "vscode" | "windsurf" | "intellij" | "unknown";
 
 export interface IDEConnectionState {
   isConnected: boolean;
@@ -29,6 +29,31 @@ export interface IDEConnectionState {
   lastHeartbeat: number | null; // timestamp of last heartbeat
   currentSessionDuration: number; // seconds in current session
   disconnectedByUser?: boolean; // true if user explicitly disconnected (prevents auto-reconnect from heartbeats)
+  // Last heartbeat per client. Several clients can be live at once (e.g. Claude
+  // Code running in Cursor's terminal), so we track them individually instead of
+  // letting whichever connected first own the whole session.
+  clients?: Partial<Record<IDEType, number>>;
+}
+
+// A client is considered live if it has sent a heartbeat within this window.
+const STALE_MS = 30000;
+
+// Clients whose last heartbeat is within the stale window
+function liveClients(
+  clients: Partial<Record<IDEType, number>> | undefined,
+  now: number
+): IDEType[] {
+  if (!clients) return [];
+  return (Object.entries(clients) as [IDEType, number][])
+    .filter(([, lastSeen]) => now - lastSeen <= STALE_MS)
+    .sort((a, b) => b[1] - a[1])
+    .map(([ide]) => ide);
+}
+
+export interface IDEBreakdownEntry {
+  totalTime: number; // total seconds connected from this client
+  sessionsCount: number;
+  lastConnectedAt: string | null; // ISO date string
 }
 
 export interface IDEConnectionHistory {
@@ -38,6 +63,7 @@ export interface IDEConnectionHistory {
   weekConnectionTime: number; // seconds connected this week
   lastSessionDate: string | null; // ISO date string
   dailyHistory: Record<string, number>; // date -> seconds
+  ideBreakdown: Partial<Record<IDEType, IDEBreakdownEntry>>; // per-client totals
 }
 
 const defaultConnectionState: IDEConnectionState = {
@@ -46,6 +72,7 @@ const defaultConnectionState: IDEConnectionState = {
   sessionStartTime: null,
   lastHeartbeat: null,
   currentSessionDuration: 0,
+  clients: {},
 };
 
 const defaultHistory: IDEConnectionHistory = {
@@ -55,6 +82,7 @@ const defaultHistory: IDEConnectionHistory = {
   weekConnectionTime: 0,
   lastSessionDate: null,
   dailyHistory: {},
+  ideBreakdown: {},
 };
 
 // Read connection state
@@ -83,18 +111,19 @@ async function writeConnectionState(state: IDEConnectionState): Promise<void> {
   }
 }
 
-// Read history
+// Read history (backfills fields added after a history file was first written)
 async function readHistory(): Promise<IDEConnectionHistory> {
   const redisClient = getRedis();
   try {
+    let history: IDEConnectionHistory | null;
     if (redisClient) {
-      const history = await redisClient.get<IDEConnectionHistory>(REDIS_HISTORY_KEY);
-      return history || defaultHistory;
+      history = await redisClient.get<IDEConnectionHistory>(REDIS_HISTORY_KEY);
     } else {
       const historyFile = CONNECTION_FILE.replace(".json", "-history.json");
-      const data = await fs.readFile(historyFile, "utf-8");
-      return JSON.parse(data);
+      history = JSON.parse(await fs.readFile(historyFile, "utf-8"));
     }
+    if (!history) return defaultHistory;
+    return { ...defaultHistory, ...history, ideBreakdown: history.ideBreakdown || {} };
   } catch {
     return defaultHistory;
   }
@@ -136,13 +165,13 @@ export async function GET() {
 
   // Check if connection is stale (no heartbeat in 30 seconds)
   const now = Date.now();
-  const isStale = state.lastHeartbeat && (now - state.lastHeartbeat > 30000);
+  const isStale = state.lastHeartbeat && (now - state.lastHeartbeat > STALE_MS);
 
   if (isStale && state.isConnected) {
     // Mark as disconnected
-    const updatedState = { ...state, isConnected: false };
+    const updatedState = { ...state, isConnected: false, clients: {} };
     await writeConnectionState(updatedState);
-    return NextResponse.json({ state: updatedState, history });
+    return NextResponse.json({ state: updatedState, history, activeIDEs: [] });
   }
 
   // Update today's time in history
@@ -153,7 +182,10 @@ export async function GET() {
     weekConnectionTime: calculateWeekTime(history.dailyHistory),
   };
 
-  return NextResponse.json({ state, history: updatedHistory });
+  // Drop stale clients so the dashboard only shows what's currently live
+  const activeIDEs = state.isConnected ? liveClients(state.clients, now) : [];
+
+  return NextResponse.json({ state, history: updatedHistory, activeIDEs });
 }
 
 // POST - Handle connection events (connect, heartbeat, disconnect)
@@ -168,21 +200,34 @@ export async function POST(request: NextRequest) {
     const todayKey = getTodayKey();
 
     if (action === "connect") {
+      const connectingIDE = ide || "unknown";
       const newState: IDEConnectionState = {
         isConnected: true,
-        connectedIDE: ide || "unknown",
+        connectedIDE: connectingIDE,
         sessionStartTime: now,
         lastHeartbeat: now,
         currentSessionDuration: 0,
         disconnectedByUser: false, // Clear the flag on explicit connect
+        clients: { ...state.clients, [connectingIDE]: now },
       };
       await writeConnectionState(newState);
 
-      // Increment session count
+      // Increment session count, globally and for this client
+      const connectedIDE = newState.connectedIDE || "unknown";
+      const nowIso = new Date().toISOString();
+      const previousEntry = history.ideBreakdown?.[connectedIDE];
       const newHistory = {
         ...history,
         sessionsCount: history.sessionsCount + 1,
-        lastSessionDate: new Date().toISOString(),
+        lastSessionDate: nowIso,
+        ideBreakdown: {
+          ...history.ideBreakdown,
+          [connectedIDE]: {
+            totalTime: previousEntry?.totalTime || 0,
+            sessionsCount: (previousEntry?.sessionsCount || 0) + 1,
+            lastConnectedAt: nowIso,
+          },
+        },
       };
       await writeHistory(newHistory);
 
@@ -195,18 +240,35 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, ignored: true, reason: "User disconnected", state, history });
       }
 
+      const heartbeatIDE = ide || state.connectedIDE || "unknown";
+
       if (!state.isConnected || !state.sessionStartTime) {
         // Auto-connect if not connected (and not explicitly disconnected by user)
         const newState: IDEConnectionState = {
           isConnected: true,
-          connectedIDE: ide || state.connectedIDE || "unknown",
+          connectedIDE: heartbeatIDE,
           sessionStartTime: now,
           lastHeartbeat: now,
           currentSessionDuration: 0,
           disconnectedByUser: false,
+          clients: { ...state.clients, [heartbeatIDE]: now },
         };
         await writeConnectionState(newState);
-        return NextResponse.json({ success: true, state: newState, history });
+
+        const previousEntry = history.ideBreakdown?.[heartbeatIDE];
+        const newHistory: IDEConnectionHistory = {
+          ...history,
+          ideBreakdown: {
+            ...history.ideBreakdown,
+            [heartbeatIDE]: {
+              totalTime: previousEntry?.totalTime || 0,
+              sessionsCount: (previousEntry?.sessionsCount || 0) + 1,
+              lastConnectedAt: new Date(now).toISOString(),
+            },
+          },
+        };
+        await writeHistory(newHistory);
+        return NextResponse.json({ success: true, state: newState, history: newHistory });
       }
 
       // Calculate session duration
@@ -215,15 +277,30 @@ export async function POST(request: NextRequest) {
         ? Math.floor((now - state.lastHeartbeat) / 1000)
         : 0;
 
+      // Per-client elapsed time, capped at the stale window so a long gap
+      // between heartbeats isn't billed as continuous connection time.
+      const clientLastSeen = state.clients?.[heartbeatIDE];
+      const clientElapsed = clientLastSeen
+        ? Math.min(Math.floor((now - clientLastSeen) / 1000), STALE_MS / 1000)
+        : 0;
+
+      const updatedClients = { ...state.clients, [heartbeatIDE]: now };
+      // Keep the headline IDE stable; only hand it over once it goes stale.
+      const currentIDEStillLive =
+        state.connectedIDE && liveClients(updatedClients, now).includes(state.connectedIDE);
+
       const newState: IDEConnectionState = {
         ...state,
+        connectedIDE: currentIDEStillLive ? state.connectedIDE : heartbeatIDE,
         lastHeartbeat: now,
         currentSessionDuration: sessionDuration,
+        clients: updatedClients,
       };
       await writeConnectionState(newState);
 
       // Update history with time since last heartbeat
       const currentDayTime = history.dailyHistory[todayKey] || 0;
+      const previousEntry = history.ideBreakdown?.[heartbeatIDE];
       const newHistory: IDEConnectionHistory = {
         ...history,
         totalConnectionTime: history.totalConnectionTime + timeSinceLastHeartbeat,
@@ -231,6 +308,14 @@ export async function POST(request: NextRequest) {
         dailyHistory: {
           ...history.dailyHistory,
           [todayKey]: currentDayTime + timeSinceLastHeartbeat,
+        },
+        ideBreakdown: {
+          ...history.ideBreakdown,
+          [heartbeatIDE]: {
+            totalTime: (previousEntry?.totalTime || 0) + clientElapsed,
+            sessionsCount: previousEntry?.sessionsCount || 0,
+            lastConnectedAt: new Date(now).toISOString(),
+          },
         },
       };
       newHistory.weekConnectionTime = calculateWeekTime(newHistory.dailyHistory);
@@ -251,6 +336,7 @@ export async function POST(request: NextRequest) {
         lastHeartbeat: null,
         currentSessionDuration: 0,
         disconnectedByUser: true, // Prevent auto-reconnect from heartbeats
+        clients: {},
       };
       await writeConnectionState(newState);
 

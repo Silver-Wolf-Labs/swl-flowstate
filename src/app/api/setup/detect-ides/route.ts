@@ -3,7 +3,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 
-type IDEType = "cursor" | "vscode" | "windsurf" | "intellij";
+type IDEType = "claude-code" | "cursor" | "vscode" | "windsurf" | "intellij";
 
 interface DetectedIDE {
   id: IDEType;
@@ -21,6 +21,16 @@ function getIDEPaths(): Record<IDEType, { paths: string[]; configDir: string; na
   if (platform === "darwin") {
     // macOS
     return {
+      "claude-code": {
+        paths: [
+          `${homeDir}/.local/bin/claude`,
+          "/opt/homebrew/bin/claude",
+          "/usr/local/bin/claude",
+        ],
+        configDir: `${homeDir}/.claude`,
+        name: "Claude Code",
+        icon: "✳️",
+      },
       cursor: {
         paths: ["/Applications/Cursor.app", `${homeDir}/Applications/Cursor.app`],
         configDir: `${homeDir}/.cursor`,
@@ -58,6 +68,15 @@ function getIDEPaths(): Record<IDEType, { paths: string[]; configDir: string; na
     const appData = process.env.APPDATA || `${homeDir}/AppData/Roaming`;
     const localAppData = process.env.LOCALAPPDATA || `${homeDir}/AppData/Local`;
     return {
+      "claude-code": {
+        paths: [
+          `${localAppData}/bin/claude.exe`,
+          `${appData}/npm/claude.cmd`,
+        ],
+        configDir: `${homeDir}/.claude`,
+        name: "Claude Code",
+        icon: "✳️",
+      },
       cursor: {
         paths: [
           `${localAppData}/Programs/Cursor/Cursor.exe`,
@@ -98,6 +117,16 @@ function getIDEPaths(): Record<IDEType, { paths: string[]; configDir: string; na
   } else {
     // Linux
     return {
+      "claude-code": {
+        paths: [
+          `${homeDir}/.local/bin/claude`,
+          "/usr/local/bin/claude",
+          "/usr/bin/claude",
+        ],
+        configDir: `${homeDir}/.claude`,
+        name: "Claude Code",
+        icon: "✳️",
+      },
       cursor: {
         paths: ["/usr/bin/cursor", `${homeDir}/.local/bin/cursor`],
         configDir: `${homeDir}/.config/Cursor`,
@@ -138,6 +167,12 @@ async function checkPathExists(filePath: string): Promise<boolean> {
   }
 }
 
+// Claude Code stores user-scope MCP servers in ~/.claude.json rather than a
+// dedicated mcp.json alongside the other IDEs.
+const CONFIG_FILE_NAMES: Partial<Record<IDEType, string>> = {
+  "claude-code": ".claude.json",
+};
+
 async function detectIDE(
   id: IDEType,
   config: { paths: string[]; configDir: string; name: string; icon: string }
@@ -156,11 +191,15 @@ async function detectIDE(
     detected = true;
   }
 
+  const configPath = id === "claude-code"
+    ? path.join(os.homedir(), ".claude.json")
+    : path.join(config.configDir, CONFIG_FILE_NAMES[id] ?? "mcp.json");
+
   return {
     id,
     name: config.name,
     detected,
-    configPath: path.join(config.configDir, "mcp.json"),
+    configPath,
     icon: config.icon,
   };
 }
