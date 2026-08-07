@@ -1,8 +1,13 @@
 name: Nightly UI Tests
 
 # Runs the Playwright suite every night and reports through two channels:
-#   1. an HTML report published to GitHub Pages (traces, screenshots, video)
+#   1. the HTML report (traces, screenshots, video) uploaded as a run artifact
 #   2. a GitHub issue, opened on failure and closed automatically once green
+#
+# The report is an artifact rather than a GitHub Pages site on purpose: Pages on a
+# private repo needs a paid plan, and artifacts cost nothing. Reading a failure
+# means downloading one zip and running `npx playwright show-report <folder>` —
+# the "Reproduce locally" line in the issue spells that out.
 #
 # Also runnable on demand from the Actions tab, and on pull requests that touch
 # the UI or the tests themselves.
@@ -85,10 +90,10 @@ jobs:
       - name: Build Markdown summary
         id: summary
         run: |
-          # The Pages deploy happens in a later job, so link to its stable URL.
+          # Point at this run's artifact list — that is where the HTML report lands.
           node scripts/summarize-results.mjs test-results/results.json \
             --title "FlowState UI tests — full suite" \
-            --report-url "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" \
+            --report-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts" \
             > summary.md
           cat summary.md >> "$GITHUB_STEP_SUMMARY"
 
@@ -199,43 +204,12 @@ jobs:
           exit 1
 
   # ---------------------------------------------------------------------------
-  # Publish the HTML report so a failure can be read without downloading a zip.
-  # ---------------------------------------------------------------------------
-  publish-report:
-    name: Publish report to Pages
-    needs: [local-suite]
-    if: always() && github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-    outputs:
-      page_url: ${{ steps.deploy.outputs.page_url }}
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: playwright-report
-          path: report
-
-      - uses: actions/configure-pages@v5
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: report
-
-      - id: deploy
-        uses: actions/deploy-pages@v4
-
-  # ---------------------------------------------------------------------------
   # Nightly issue: opened on failure, updated nightly while still failing, and
   # closed automatically once the suite goes green.
   # ---------------------------------------------------------------------------
   report-issue:
     name: File or close the nightly issue
-    needs: [local-suite, production-smoke, publish-report]
+    needs: [local-suite, production-smoke]
     # Scheduled runs only — PRs already show their status in the checks list.
     if: always() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
@@ -255,7 +229,7 @@ jobs:
         env:
           LOCAL_RESULT: ${{ needs.local-suite.result }}
           PRODUCTION_RESULT: ${{ needs.production-smoke.result }}
-          REPORT_URL: ${{ needs.publish-report.outputs.page_url || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}
+          REPORT_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts
           # Set a repo variable NIGHTLY_REVIEWERS to "fau1095,danielshandle" so the
           # right people are pinged. Falls back to the repo owner alone.
           REVIEWERS: ${{ vars.NIGHTLY_REVIEWERS || 'fau1095' }}
@@ -322,10 +296,16 @@ jobs:
           const body = [
             details.trim() || '⚠️ No summary was produced — the run failed before any test executed.',
             '---',
-            `📊 **[HTML report](${process.env.REPORT_URL})** — traces, screenshots and video per failure.`,
+            `📊 **[Download the HTML report](${process.env.REPORT_URL})** — the \`playwright-report\` artifact holds a trace, screenshot and video for every failure.`,
+            '',
+            'To read it: download and unzip the artifact, then run',
+            '```bash',
+            'npx playwright show-report path/to/playwright-report',
+            '```',
+            '',
             `🔧 [Workflow run](${runUrl})`,
             '',
-            `Reproduce locally: \`npm run test:ui\` (or \`npm run test:ui:report\` to reopen the last report).`,
+            `Reproduce locally: \`npm run test:ui\` (or \`npm run test:ui:report\` to reopen your own last report).`,
             '',
             mentions.map((name) => `@${name}`).join(' '),
           ].join('\n');

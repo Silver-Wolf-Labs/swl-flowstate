@@ -88,7 +88,11 @@ lines.push(`**${verdict}** — ${passed.length} passed, ${failed.length} failed,
 lines.push("");
 
 if (reportUrl) {
-  lines.push(`📊 [Full HTML report](${reportUrl}) — includes traces, screenshots and video for each failure.`);
+  lines.push(
+    `📊 [Download the HTML report](${reportUrl}) — the \`playwright-report\` artifact ` +
+      "includes a trace, screenshot and video for each failure. " +
+      "Open it with `npx playwright show-report <unzipped-folder>`."
+  );
   lines.push("");
 }
 

@@ -108,9 +108,24 @@ standing between a design fix and a silently accepted visual regression.
 The workflow runs the full local suite plus a production smoke test each night at
 03:00 UTC and reports through two channels:
 
-1. **HTML report on GitHub Pages** — traces, screenshots and video per failure.
+1. **The HTML report, as a run artifact** — a trace, screenshot and video for
+   every failure. Download the `playwright-report` artifact from the run, unzip
+   it, then:
+
+   ```bash
+   npx playwright show-report path/to/playwright-report
+   ```
+
+   It is an artifact rather than a GitHub Pages site because Pages on a private
+   repo needs a paid plan, and artifacts are free.
+
 2. **A GitHub issue** — opened on first failure and updated with a comment on
    subsequent nights, then closed automatically once the suite goes green again.
+   Set the repo variable `NIGHTLY_REVIEWERS` (e.g. `fau1095,daniels-handle`) to
+   control who gets pinged; it defaults to the repo owner alone.
 
-`scripts/summarize-results.mjs` builds the Markdown for both from
+Every run also writes the same summary to the job's **Actions summary** page, so
+a green/red verdict with counts is visible without downloading anything.
+
+`scripts/summarize-results.mjs` builds the Markdown for all of these from
 `test-results/results.json`.
