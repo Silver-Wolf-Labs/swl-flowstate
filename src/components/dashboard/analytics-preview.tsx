@@ -163,7 +163,7 @@ export function AnalyticsPreview() {
   ];
 
   return (
-    <Card variant="gradient" id="analytics">
+    <Card variant="gradient">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>

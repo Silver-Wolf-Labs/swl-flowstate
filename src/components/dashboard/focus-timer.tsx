@@ -211,12 +211,16 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
   // Only reset timeLeft when config or mode changes (not on pause)
   const prevModeRef = useRef(mode);
   const prevConfigRef = useRef(config);
+  // Set when a sync update supplies both a mode and an explicit timeRemaining, so
+  // the reset below does not overwrite the remaining time MCP just handed us.
+  const skipModeResetRef = useRef(false);
   useEffect(() => {
     // Only reset if mode or config actually changed (not just isRunning)
     if (mode !== prevModeRef.current || config[mode] !== prevConfigRef.current[mode]) {
-      if (!isRunning) {
+      if (!isRunning && !skipModeResetRef.current) {
         setTimeLeft(config[mode]);
       }
+      skipModeResetRef.current = false;
       prevModeRef.current = mode;
       prevConfigRef.current = config;
     }
@@ -248,10 +252,13 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
         persistConfig(nextConfig);
       }
       
+      const hasExplicitTime = typeof syncState.timeRemaining === "number";
       if (syncState.mode && syncState.mode !== mode) {
+        // Suppress the mode-change reset so MCP's timeRemaining survives it.
+        skipModeResetRef.current = hasExplicitTime;
         setMode(syncState.mode);
       }
-      if (typeof syncState.timeRemaining === "number") {
+      if (hasExplicitTime) {
         setTimeLeft(syncState.timeRemaining);
       }
       if (typeof syncState.isRunning === "boolean") {
@@ -446,7 +453,7 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
   const formatTime = (num: number) => num.toString().padStart(2, "0");
 
   return (
-    <Card variant="glow" className="relative overflow-hidden" id="focus">
+    <Card variant="glow" className="relative overflow-hidden">
       {/* Animated background pulse when running */}
       <AnimatePresence>
         {isRunning && (
@@ -488,10 +495,11 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
               key={m}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 mode === m
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-primary-strong text-primary-foreground"
                   : "bg-secondary text-muted-foreground hover:text-foreground"
               }`}
               onClick={() => switchMode(m)}
+              aria-pressed={mode === m}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -552,6 +560,7 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
               size="icon"
               onClick={resetTimer}
               className="w-12 h-12"
+              aria-label="Reset timer"
             >
               <RotateCcw className="w-5 h-5" />
             </Button>
@@ -601,6 +610,8 @@ export function FocusTimer({ mood = "focus", onSessionComplete, syncState, updat
               size="icon"
               className="w-12 h-12"
               onClick={() => setShowSettings(!showSettings)}
+              aria-label="Timer settings"
+              aria-expanded={showSettings}
             >
               <Settings className="w-5 h-5" />
             </Button>

@@ -7,12 +7,17 @@
   --card-foreground: #fafafa;
   --primary: #8b5cf6;
   --primary-foreground: #fafafa;
+  /* One violet cannot serve both roles at AA: #8b5cf6 is only 4.06:1 behind light
+     text, and only 4.47:1 as text on a card. These two carry the accessible ends. */
+  --primary-strong: #6d28d9; /* 6.8:1 behind --primary-foreground — use as a background */
+  --primary-soft: #a78bfa; /* ≥6.8:1 on every surface — use as text */
   --secondary: #1e1e2e;
   --secondary-foreground: #a1a1aa;
   --accent: #06b6d4;
   --accent-foreground: #fafafa;
   --muted: #27272a;
-  --muted-foreground: #71717a;
+  /* 5.7:1 on --card, 6.1:1 on --background. #71717a was only 3.85:1 (WCAG AA needs 4.5:1). */
+  --muted-foreground: #8e8e99;
   --border: #27272a;
   --ring: #8b5cf6;
   
@@ -35,6 +40,8 @@
   --color-card-foreground: var(--card-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-strong: var(--primary-strong);
+  --color-primary-soft: var(--primary-soft);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-accent: var(--accent);

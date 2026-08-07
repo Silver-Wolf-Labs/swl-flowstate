@@ -113,7 +113,7 @@ export function Footer() {
                   <li key={link.label}>
                     <motion.a
                       href={link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className="inline-flex items-center min-h-8 py-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
                       whileHover={{ x: 4 }}
                       {...(link.external && { target: "_blank", rel: "noopener noreferrer" })}
                     >

@@ -150,7 +150,8 @@ export function MoodSelector({ onMoodSelect, currentMood: externalMood }: MoodSe
           <div className="flex items-center gap-2">
             <motion.button
               onClick={handleAISuggest}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/30 text-sm font-medium hover:from-primary/30 hover:to-accent/30 transition-all"
+              className="flex items-center gap-2 min-h-9 px-3 py-1.5 rounded-lg bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/30 text-sm font-medium hover:from-primary/30 hover:to-accent/30 transition-all"
+              aria-label="Suggest a mood with AI"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >

@@ -4,7 +4,12 @@ import path from "path";
 import { Redis } from "@upstash/redis";
 
 // State file path for local development
-const STATE_FILE = path.join(process.cwd(), ".flowstate-state.json");
+// See FLOWSTATE_STATE_DIR in src/app/api/ide-connection/route.ts — lets tests run
+// against isolated state instead of the developer's live session files.
+const STATE_FILE = path.join(
+  process.env.FLOWSTATE_STATE_DIR || process.cwd(),
+  ".flowstate-state.json"
+);
 const REDIS_KEY = "flowstate:state";
 
 // Lazy initialize Redis client

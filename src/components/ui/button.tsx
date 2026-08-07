@@ -12,17 +12,24 @@ interface ButtonProps {
   disabled?: boolean;
   onClick?: () => void;
   type?: "button" | "submit" | "reset";
+  /** Required for icon-only buttons — without it screen readers announce nothing. */
+  "aria-label"?: string;
+  "aria-expanded"?: boolean;
+  "aria-pressed"?: boolean;
+  "aria-controls"?: string;
+  title?: string;
 }
 
-export function Button({ 
-  className, 
-  variant = "default", 
-  size = "md", 
-  children, 
-  isLoading, 
+export function Button({
+  className,
+  variant = "default",
+  size = "md",
+  children,
+  isLoading,
   disabled,
   onClick,
   type = "button",
+  ...ariaProps
 }: ButtonProps) {
   const baseStyles = "relative inline-flex items-center justify-center font-medium transition-all duration-300 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 overflow-hidden";
   
@@ -50,6 +57,7 @@ export function Button({
       transition={{ type: "spring", stiffness: 400, damping: 17 }}
       disabled={disabled || isLoading}
       onClick={onClick}
+      {...ariaProps}
     >
       {/* Shimmer effect on hover */}
       <motion.div

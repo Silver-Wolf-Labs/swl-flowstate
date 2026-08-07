@@ -3,7 +3,10 @@ import { promises as fs } from "fs";
 import path from "path";
 import { Redis } from "@upstash/redis";
 
-const CONNECTION_FILE = path.join(process.cwd(), ".flowstate-ide-connection.json");
+// FLOWSTATE_STATE_DIR lets a test run keep its state out of the developer's real
+// files, so an actual MCP session cannot contaminate assertions (and vice versa).
+const STATE_DIR = process.env.FLOWSTATE_STATE_DIR || process.cwd();
+const CONNECTION_FILE = path.join(STATE_DIR, ".flowstate-ide-connection.json");
 const REDIS_CONNECTION_KEY = "flowstate:ide-connection";
 const REDIS_HISTORY_KEY = "flowstate:ide-history";
 

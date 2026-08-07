@@ -124,7 +124,7 @@ export default function PrivacyPage() {
               <h2 className="text-xl font-semibold mb-4">10. Contact Us</h2>
               <p className="text-muted-foreground leading-relaxed">
                 If you have questions about this Privacy Policy, please contact us at{" "}
-                <a href="mailto:fabriziomendezalberti@gmail.com" className="text-primary hover:underline">
+                <a href="mailto:fabriziomendezalberti@gmail.com" className="text-primary-soft underline underline-offset-2">
                   fabriziomendezalberti@gmail.com
                 </a>
               </p>

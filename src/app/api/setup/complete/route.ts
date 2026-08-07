@@ -3,7 +3,11 @@ import { promises as fs } from "fs";
 import path from "path";
 import { Redis } from "@upstash/redis";
 
-const SETUP_FILE = path.join(process.cwd(), ".flowstate-setup.json");
+// See FLOWSTATE_STATE_DIR in src/app/api/ide-connection/route.ts.
+const SETUP_FILE = path.join(
+  process.env.FLOWSTATE_STATE_DIR || process.cwd(),
+  ".flowstate-setup.json"
+);
 const REDIS_SETUP_KEY = "flowstate:setup";
 
 // Lazy initialize Redis client

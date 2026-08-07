@@ -114,6 +114,17 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
     }
   };
 
+  // Escape must close the modal — without it a keyboard user is trapped, since
+  // the only other way out is clicking the backdrop or the X.
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, onClose]);
+
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -191,10 +202,14 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
+            aria-hidden="true"
           />
 
           {/* Modal */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pricing-modal-title"
             className="fixed inset-4 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-[101] sm:w-full sm:max-w-4xl flex flex-col max-h-[calc(100vh-2rem)] sm:max-h-[90vh]"
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -205,13 +220,16 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
               {/* Header - fixed */}
               <div className="flex items-center justify-between p-4 sm:p-6 border-b border-border shrink-0">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold">Choose Your Plan</h2>
+                  <h2 id="pricing-modal-title" className="text-xl sm:text-2xl font-bold">
+                    Choose Your Plan
+                  </h2>
                   <p className="text-xs sm:text-sm text-muted-foreground">
                     Unlock your full productivity potential
                   </p>
                 </div>
                 <button
                   onClick={onClose}
+                  aria-label="Close pricing"
                   className="p-2 rounded-lg hover:bg-secondary transition-colors"
                 >
                   <X className="w-5 h-5" />

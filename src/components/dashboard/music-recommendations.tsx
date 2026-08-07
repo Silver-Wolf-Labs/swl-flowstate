@@ -231,7 +231,7 @@ export function MusicRecommendations({ mood = "focus" }: MusicRecommendationsPro
   }, []);
 
   return (
-    <Card variant="glass" className="relative overflow-hidden" id="music">
+    <Card variant="glass" className="relative overflow-hidden">
       {/* Animated music waves background */}
       <div className="absolute bottom-0 left-0 right-0 h-32 opacity-10 overflow-hidden">
         {[...Array(5)].map((_, i) => (
@@ -269,8 +269,8 @@ export function MusicRecommendations({ mood = "focus" }: MusicRecommendationsPro
             </CardDescription>
           </div>
           
-          {/* Connection buttons */}
-          <div className="flex items-center gap-2">
+          {/* Connection buttons — wrap so the last one is not clipped on narrow screens */}
+          <div className="flex items-center gap-2 flex-wrap">
             {isConnected ? (
               <Button variant="outline" size="sm" onClick={disconnect}>
                 <LogOut className="w-4 h-4 mr-2" />
@@ -425,7 +425,8 @@ export function MusicRecommendations({ mood = "focus" }: MusicRecommendationsPro
                 </p>
                 <Button 
                   onClick={connectYouTube}
-                  className="bg-[#FF0000] hover:bg-[#FF0000]/90 text-white"
+                  // #CC0000 rather than #FF0000: white on pure red is only 3.99:1.
+                  className="bg-[#CC0000] hover:bg-[#CC0000]/90 text-white"
                 >
                   <YouTubeIcon className="w-4 h-4 mr-2" />
                   Connect YouTube

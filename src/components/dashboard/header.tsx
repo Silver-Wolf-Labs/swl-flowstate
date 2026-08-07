@@ -79,6 +79,7 @@ export function Header({ onGetStarted }: HeaderProps) {
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl bg-secondary hover:bg-secondary/80 transition-colors"
+              aria-label="View FlowState on GitHub"
               whileHover={{ scale: 1.05, rotate: 5 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -96,6 +97,8 @@ export function Header({ onGetStarted }: HeaderProps) {
             {/* Mobile menu button */}
             <motion.button
               className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-secondary"
+              aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={mobileMenuOpen}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               whileTap={{ scale: 0.95 }}
             >

@@ -40,8 +40,8 @@ export default function TermsPage() {
             <section className="p-4 bg-secondary/30 rounded-xl border border-border">
               <h2 className="text-lg font-semibold mb-3">Contents</h2>
               <ul className="space-y-1 text-sm">
-                <li><a href="#terms" className="text-primary hover:underline">Terms of Service</a></li>
-                <li><a href="#refund" className="text-primary hover:underline">Refund Policy</a></li>
+                <li><a href="#terms" className="text-primary-soft underline underline-offset-2">Terms of Service</a></li>
+                <li><a href="#refund" className="text-primary-soft underline underline-offset-2">Refund Policy</a></li>
               </ul>
             </section>
 
@@ -143,7 +143,7 @@ export default function TermsPage() {
               <h3 className="text-xl font-semibold mb-4">How to Request a Refund or Cancellation</h3>
               <p className="text-muted-foreground leading-relaxed mb-4">
                 To request a refund or cancel your purchase, please contact Paddle directly through their support channels at{" "}
-                <a href="https://paddle.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">paddle.com</a>.
+                <a href="https://paddle.com" target="_blank" rel="noopener noreferrer" className="text-primary-soft underline underline-offset-2">paddle.com</a>.
               </p>
               <p className="text-muted-foreground leading-relaxed">
                 Paddle will reimburse all payments using the same payment method you used for the initial transaction, without undue delay and no later than 14 days after being informed of your decision to cancel.
@@ -175,7 +175,7 @@ export default function TermsPage() {
               <h3 className="text-xl font-semibold mb-4">Contact Us</h3>
               <p className="text-muted-foreground leading-relaxed">
                 For questions about these Terms & Conditions or our Refund Policy, please contact us at{" "}
-                <a href="mailto:fabriziomendezalberti@gmail.com" className="text-primary hover:underline">
+                <a href="mailto:fabriziomendezalberti@gmail.com" className="text-primary-soft underline underline-offset-2">
                   fabriziomendezalberti@gmail.com
                 </a>
               </p>
