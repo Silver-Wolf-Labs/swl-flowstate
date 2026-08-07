@@ -1,0 +1,363 @@
+name: Nightly UI Tests
+
+# Runs the Playwright suite every night and reports through two channels:
+#   1. an HTML report published to GitHub Pages (traces, screenshots, video)
+#   2. a GitHub issue, opened on failure and closed automatically once green
+#
+# Also runnable on demand from the Actions tab, and on pull requests that touch
+# the UI or the tests themselves.
+on:
+  schedule:
+    # 03:00 UTC — after the working day in the Americas, before it starts in Europe.
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      update_snapshots:
+        description: "Regenerate visual baselines instead of comparing against them"
+        type: boolean
+        default: false
+  pull_request:
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "playwright.config.ts"
+      - "package.json"
+      - ".github/workflows/nightly-ui-tests.yml"
+
+# A newer run supersedes an in-flight one on the same ref.
+concurrency:
+  group: ui-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Full suite against a production build served inside the runner.
+  # ---------------------------------------------------------------------------
+  local-suite:
+    name: Full suite (CI build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      verdict: ${{ steps.summary.outputs.verdict }}
+      failed_count: ${{ steps.summary.outputs.failed_count }}
+      flaky_count: ${{ steps.summary.outputs.flaky_count }}
+      passed_count: ${{ steps.summary.outputs.passed_count }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          # Keyed on the Playwright version so a bump fetches matching binaries.
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium webkit
+
+      - name: Run UI tests
+        id: tests
+        # Do not stop the job: the reporting steps below must still run so a
+        # failure is explained rather than just marked red.
+        continue-on-error: true
+        env:
+          CI: "true"
+          TEST_TARGET: local
+        run: |
+          if [ "${{ inputs.update_snapshots }}" = "true" ]; then
+            npx playwright test --update-snapshots
+          else
+            npx playwright test
+          fi
+
+      - name: Build Markdown summary
+        id: summary
+        run: |
+          # The Pages deploy happens in a later job, so link to its stable URL.
+          node scripts/summarize-results.mjs test-results/results.json \
+            --title "FlowState UI tests — full suite" \
+            --report-url "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" \
+            > summary.md
+          cat summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: summary-local
+          path: summary.md
+          retention-days: 30
+
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Upload traces and videos
+        if: steps.tests.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-artifacts
+          path: test-results/
+          retention-days: 14
+
+      - name: Regenerated baselines (manual runs only)
+        if: inputs.update_snapshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: updated-snapshots
+          path: tests/visual.spec.ts-snapshots/
+          retention-days: 14
+
+      - name: Fail the job if tests failed
+        if: steps.tests.outcome == 'failure' && !inputs.update_snapshots
+        run: |
+          echo "::error::UI tests failed — see the run summary and the HTML report."
+          exit 1
+
+  # ---------------------------------------------------------------------------
+  # Smoke tests against the live deploy. Mutates nothing, so it is safe to run
+  # against production. Separate job so a broken build still checks the real site.
+  # ---------------------------------------------------------------------------
+  production-smoke:
+    name: Smoke test (production)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Baseline-regeneration runs are about local rendering, not the live site.
+    if: ${{ !inputs.update_snapshots }}
+    outputs:
+      verdict: ${{ steps.summary.outputs.verdict }}
+      failed_count: ${{ steps.summary.outputs.failed_count }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run smoke tests against production
+        id: tests
+        continue-on-error: true
+        env:
+          CI: "true"
+          TEST_TARGET: production
+          # Override in repo settings (Variables) if the domain changes.
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL || 'https://flowstate-swl.vercel.app' }}
+        run: npx playwright test
+
+      - name: Build Markdown summary
+        id: summary
+        run: |
+          node scripts/summarize-results.mjs test-results/results.json \
+            --title "FlowState UI tests — production smoke" > summary.md
+          cat summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: summary-production
+          path: summary.md
+          retention-days: 30
+
+      - name: Upload failure artifacts
+        if: steps.tests.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-artifacts-production
+          path: test-results/
+          retention-days: 14
+
+      - name: Fail the job if smoke tests failed
+        if: steps.tests.outcome == 'failure'
+        run: |
+          echo "::error::Production smoke tests failed — the live site may be broken."
+          exit 1
+
+  # ---------------------------------------------------------------------------
+  # Publish the HTML report so a failure can be read without downloading a zip.
+  # ---------------------------------------------------------------------------
+  publish-report:
+    name: Publish report to Pages
+    needs: [local-suite]
+    if: always() && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: playwright-report
+          path: report
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: report
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+  # ---------------------------------------------------------------------------
+  # Nightly issue: opened on failure, updated nightly while still failing, and
+  # closed automatically once the suite goes green.
+  # ---------------------------------------------------------------------------
+  report-issue:
+    name: File or close the nightly issue
+    needs: [local-suite, production-smoke, publish-report]
+    # Scheduled runs only — PRs already show their status in the checks list.
+    if: always() && github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download summaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: summary-*
+          path: summaries
+
+      - name: Open, update or close the tracking issue
+        uses: actions/github-script@v7
+        env:
+          LOCAL_RESULT: ${{ needs.local-suite.result }}
+          PRODUCTION_RESULT: ${{ needs.production-smoke.result }}
+          REPORT_URL: ${{ needs.publish-report.outputs.page_url || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}
+          # Set a repo variable NIGHTLY_REVIEWERS to "fau1095,danielshandle" so the
+          # right people are pinged. Falls back to the repo owner alone.
+          REVIEWERS: ${{ vars.NIGHTLY_REVIEWERS || 'fau1095' }}
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+
+          const LABEL = 'nightly-ui-failure';
+          const TITLE = 'Nightly UI tests are failing';
+
+          const failed =
+            process.env.LOCAL_RESULT === 'failure' ||
+            process.env.PRODUCTION_RESULT === 'failure';
+
+          // Stitch the per-job summaries together into one issue body.
+          let details = '';
+          const dir = 'summaries';
+          if (fs.existsSync(dir)) {
+            for (const entry of fs.readdirSync(dir).sort()) {
+              const file = path.join(dir, entry, 'summary.md');
+              if (fs.existsSync(file)) details += fs.readFileSync(file, 'utf8') + '\n\n';
+            }
+          }
+
+          const runUrl =
+            `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}` +
+            `/actions/runs/${process.env.GITHUB_RUN_ID}`;
+
+          // Reuse an existing open issue so a week of failures is one thread, not seven.
+          const { data: open } = await github.rest.issues.listForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: 'open',
+            labels: LABEL,
+          });
+          const existing = open[0];
+
+          if (!failed) {
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body: `✅ Tonight's run is green again — closing.\n\n[Run log](${runUrl})`,
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                state: 'closed',
+              });
+              core.info(`Closed #${existing.number}.`);
+            } else {
+              core.info('All green, nothing to report.');
+            }
+            return;
+          }
+
+          const mentions = process.env.REVIEWERS
+            .split(',')
+            .map((name) => name.trim())
+            .filter(Boolean);
+
+          const body = [
+            details.trim() || '⚠️ No summary was produced — the run failed before any test executed.',
+            '---',
+            `📊 **[HTML report](${process.env.REPORT_URL})** — traces, screenshots and video per failure.`,
+            `🔧 [Workflow run](${runUrl})`,
+            '',
+            `Reproduce locally: \`npm run test:ui\` (or \`npm run test:ui:report\` to reopen the last report).`,
+            '',
+            mentions.map((name) => `@${name}`).join(' '),
+          ].join('\n');
+
+          if (existing) {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: existing.number,
+              body: `### Still failing — ${new Date().toISOString().slice(0, 10)}\n\n${body}`,
+            });
+            core.info(`Commented on #${existing.number}.`);
+            return;
+          }
+
+          const { data: created } = await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: TITLE,
+            labels: [LABEL],
+            body,
+          });
+
+          // Assignment is best-effort: an invalid handle must not fail the report.
+          try {
+            await github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: created.number,
+              assignees: mentions,
+            });
+          } catch (error) {
+            core.warning(`Could not assign ${mentions.join(', ')}: ${error.message}`);
+          }
+          core.info(`Opened #${created.number}.`);

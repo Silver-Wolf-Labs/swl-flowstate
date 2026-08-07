@@ -6,7 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:ui": "playwright test",
+    "test:ui:headed": "playwright test --headed",
+    "test:ui:debug": "playwright test --debug",
+    "test:ui:report": "playwright show-report",
+    "test:ui:update": "playwright test --update-snapshots",
+    "test:ui:smoke": "playwright test smoke.spec.ts",
+    "test:ui:prod": "TEST_TARGET=production playwright test",
+    "test:summary": "node scripts/summarize-results.mjs test-results/results.json"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.3",
@@ -25,10 +33,13 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "axe-core": "^4.13.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",

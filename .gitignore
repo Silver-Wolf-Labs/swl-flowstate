@@ -13,6 +13,14 @@
 # testing
 /coverage
 
+# playwright
+/test-results
+/playwright-report
+/blob-report
+/playwright/.cache
+# server-side state sandbox used by the local test target
+/.playwright-state
+
 # next.js
 /.next/
 /out/
@@ -40,6 +48,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# FlowState sync state
+# FlowState sync state (local runtime state — never committed)
 .flowstate-state.json
+.flowstate-setup.json
+.flowstate-ide-connection.json
+.flowstate-ide-connection-history.json
 .env*.local
