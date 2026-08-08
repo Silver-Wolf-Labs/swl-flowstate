@@ -233,111 +233,112 @@ jobs:
           # Set a repo variable NIGHTLY_REVIEWERS to "fau1095,danielshandle" so the
           # right people are pinged. Falls back to the repo owner alone.
           REVIEWERS: ${{ vars.NIGHTLY_REVIEWERS || 'fau1095' }}
-        script: |
-          const fs = require('fs');
-          const path = require('path');
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
 
-          const LABEL = 'nightly-ui-failure';
-          const TITLE = 'Nightly UI tests are failing';
+            const LABEL = 'nightly-ui-failure';
+            const TITLE = 'Nightly UI tests are failing';
 
-          const failed =
-            process.env.LOCAL_RESULT === 'failure' ||
-            process.env.PRODUCTION_RESULT === 'failure';
+            const failed =
+              process.env.LOCAL_RESULT === 'failure' ||
+              process.env.PRODUCTION_RESULT === 'failure';
 
-          // Stitch the per-job summaries together into one issue body.
-          let details = '';
-          const dir = 'summaries';
-          if (fs.existsSync(dir)) {
-            for (const entry of fs.readdirSync(dir).sort()) {
-              const file = path.join(dir, entry, 'summary.md');
-              if (fs.existsSync(file)) details += fs.readFileSync(file, 'utf8') + '\n\n';
+            // Stitch the per-job summaries together into one issue body.
+            let details = '';
+            const dir = 'summaries';
+            if (fs.existsSync(dir)) {
+              for (const entry of fs.readdirSync(dir).sort()) {
+                const file = path.join(dir, entry, 'summary.md');
+                if (fs.existsSync(file)) details += fs.readFileSync(file, 'utf8') + '\n\n';
+              }
             }
-          }
 
-          const runUrl =
-            `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}` +
-            `/actions/runs/${process.env.GITHUB_RUN_ID}`;
+            const runUrl =
+              `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}` +
+              `/actions/runs/${process.env.GITHUB_RUN_ID}`;
 
-          // Reuse an existing open issue so a week of failures is one thread, not seven.
-          const { data: open } = await github.rest.issues.listForRepo({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            state: 'open',
-            labels: LABEL,
-          });
-          const existing = open[0];
+            // Reuse an existing open issue so a week of failures is one thread, not seven.
+            const { data: open } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: LABEL,
+            });
+            const existing = open[0];
 
-          if (!failed) {
+            if (!failed) {
+              if (existing) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: existing.number,
+                  body: `✅ Tonight's run is green again — closing.\n\n[Run log](${runUrl})`,
+                });
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: existing.number,
+                  state: 'closed',
+                });
+                core.info(`Closed #${existing.number}.`);
+              } else {
+                core.info('All green, nothing to report.');
+              }
+              return;
+            }
+
+            const mentions = process.env.REVIEWERS
+              .split(',')
+              .map((name) => name.trim())
+              .filter(Boolean);
+
+            const body = [
+              details.trim() || '⚠️ No summary was produced — the run failed before any test executed.',
+              '---',
+              `📊 **[Download the HTML report](${process.env.REPORT_URL})** — the \`playwright-report\` artifact holds a trace, screenshot and video for every failure.`,
+              '',
+              'To read it: download and unzip the artifact, then run',
+              '```bash',
+              'npx playwright show-report path/to/playwright-report',
+              '```',
+              '',
+              `🔧 [Workflow run](${runUrl})`,
+              '',
+              `Reproduce locally: \`npm run test:ui\` (or \`npm run test:ui:report\` to reopen your own last report).`,
+              '',
+              mentions.map((name) => `@${name}`).join(' '),
+            ].join('\n');
+
             if (existing) {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: existing.number,
-                body: `✅ Tonight's run is green again — closing.\n\n[Run log](${runUrl})`,
+                body: `### Still failing — ${new Date().toISOString().slice(0, 10)}\n\n${body}`,
               });
-              await github.rest.issues.update({
+              core.info(`Commented on #${existing.number}.`);
+              return;
+            }
+
+            const { data: created } = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: TITLE,
+              labels: [LABEL],
+              body,
+            });
+
+            // Assignment is best-effort: an invalid handle must not fail the report.
+            try {
+              await github.rest.issues.addAssignees({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: existing.number,
-                state: 'closed',
+                issue_number: created.number,
+                assignees: mentions,
               });
-              core.info(`Closed #${existing.number}.`);
-            } else {
-              core.info('All green, nothing to report.');
+            } catch (error) {
+              core.warning(`Could not assign ${mentions.join(', ')}: ${error.message}`);
             }
-            return;
-          }
-
-          const mentions = process.env.REVIEWERS
-            .split(',')
-            .map((name) => name.trim())
-            .filter(Boolean);
-
-          const body = [
-            details.trim() || '⚠️ No summary was produced — the run failed before any test executed.',
-            '---',
-            `📊 **[Download the HTML report](${process.env.REPORT_URL})** — the \`playwright-report\` artifact holds a trace, screenshot and video for every failure.`,
-            '',
-            'To read it: download and unzip the artifact, then run',
-            '```bash',
-            'npx playwright show-report path/to/playwright-report',
-            '```',
-            '',
-            `🔧 [Workflow run](${runUrl})`,
-            '',
-            `Reproduce locally: \`npm run test:ui\` (or \`npm run test:ui:report\` to reopen your own last report).`,
-            '',
-            mentions.map((name) => `@${name}`).join(' '),
-          ].join('\n');
-
-          if (existing) {
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: existing.number,
-              body: `### Still failing — ${new Date().toISOString().slice(0, 10)}\n\n${body}`,
-            });
-            core.info(`Commented on #${existing.number}.`);
-            return;
-          }
-
-          const { data: created } = await github.rest.issues.create({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            title: TITLE,
-            labels: [LABEL],
-            body,
-          });
-
-          // Assignment is best-effort: an invalid handle must not fail the report.
-          try {
-            await github.rest.issues.addAssignees({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: created.number,
-              assignees: mentions,
-            });
-          } catch (error) {
-            core.warning(`Could not assign ${mentions.join(', ')}: ${error.message}`);
-          }
-          core.info(`Opened #${created.number}.`);
+            core.info(`Opened #${created.number}.`);
