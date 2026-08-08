@@ -21,6 +21,10 @@ on:
         description: "Regenerate visual baselines instead of comparing against them"
         type: boolean
         default: false
+      run_report:
+        description: "Also run the issue-reporting job, which otherwise only runs on the nightly schedule"
+        type: boolean
+        default: false
   pull_request:
     paths:
       - "src/**"
@@ -211,14 +215,27 @@ jobs:
     name: File or close the nightly issue
     needs: [local-suite, production-smoke]
     # Scheduled runs only — PRs already show their status in the checks list.
-    if: always() && github.event_name == 'schedule'
+    # `run_report` exists so this job can be rehearsed from the Actions tab, since
+    # it is the one part of the pipeline the nightly cron exercises alone. Branch
+    # on the event first: on a schedule `inputs` is null, and testing a null input
+    # against `false` would be true, which would skip the job every night.
+    if: always() && (github.event_name == 'schedule' || inputs.run_report)
     runs-on: ubuntu-latest
+    # A job-level block replaces the workflow default outright rather than adding
+    # to it, so `contents: read` has to be repeated here or the checkout below
+    # has no token to clone with.
     permissions:
+      contents: read
       issues: write
     steps:
       - uses: actions/checkout@v4
 
       - name: Download summaries
+        # A run that dies before any summary is uploaded matches no artifact, and
+        # download-artifact treats that as a hard error. That is precisely the run
+        # worth reporting, so let the step fail and leave the script to fall back
+        # to its "no summary was produced" body.
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           pattern: summary-*
